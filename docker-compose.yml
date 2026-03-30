@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  app:
+    image: whatsapp-automation:latest
+    volumes:
+      - ./auth_info:/app/auth_info
+      - ./service-account.json:/app/service-account.json
+    environment:
+      - WHATSAPP_API_KEY=${WHATSAPP_API_KEY}
+      - OTHER_ENV_VAR=${OTHER_ENV_VAR}
+    restart: unless-stopped
