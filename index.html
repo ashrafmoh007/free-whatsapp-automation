@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="FEL International Shipping — global logistics, freight forwarding, and supply chain solutions across UAE, India and the GCC." />
+<title>FEL International Shipping — Modern Logistics, Worldwide.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy-900: #07182b;
+    --navy-800: #0d2535;
+    --navy-700: #133146;
+    --navy-600: #1b425e;
+    --blue-500: #29abe2;
+    --blue-400: #4dc1f0;
+    --blue-300: #7ed4f5;
+    --blue-50:  #eaf7fd;
+    --grey-900: #1a2230;
+    --grey-700: #4a4a4a;
+    --grey-500: #7c8a99;
+    --grey-300: #cdd6e0;
+    --grey-100: #f0f4f8;
+    --white:    #ffffff;
+    --green-whatsapp: #25d366;
+    --shadow-sm: 0 2px 8px rgba(7,24,43,0.06);
+    --shadow-md: 0 8px 30px rgba(7,24,43,0.10);
+    --shadow-lg: 0 20px 60px rgba(7,24,43,0.18);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --radius-xl: 32px;
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --container: 1240px;
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--navy-800);
+    background: var(--white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: 0; background: none; }
+  .container { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
+
+  /* ============ TYPOGRAPHY ============ */
+  h1, h2, h3, h4 { font-family: 'Manrope', 'Inter', sans-serif; font-weight: 800; line-height: 1.15; margin: 0 0 .5em; letter-spacing: -.01em; }
+  h1 { font-size: clamp(2.3rem, 5.4vw, 4.4rem); }
+  h2 { font-size: clamp(1.9rem, 3.8vw, 3rem); }
+  h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+  p  { font-size: 1rem; color: var(--grey-700); }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: .78rem; font-weight: 700; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--navy-800);
+  }
+  .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--blue-500); display: inline-block; }
+  .eyebrow svg { width: 14px; height: 14px; color: var(--blue-500); }
+  .eyebrow.light { color: rgba(255,255,255,.85); }
+  .eyebrow.center { justify-content: center; }
+
+  .h2-stack .accent {
+    display: inline-block; color: var(--blue-500);
+    position: relative; padding-bottom: 4px;
+  }
+  .h2-stack .accent::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
+    height: 3px; background: var(--blue-500); border-radius: 2px; opacity: .85;
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 26px; border-radius: 999px;
+    font-weight: 600; font-size: .95rem;
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease);
+    will-change: transform;
+  }
+  .btn-primary {
+    background: var(--blue-500); color: var(--white);
+    box-shadow: 0 10px 24px -10px rgba(41,171,226,.7);
+  }
+  .btn-primary:hover { transform: translateY(-2px); background: var(--blue-400); box-shadow: 0 14px 28px -8px rgba(41,171,226,.7); }
+  .btn-ghost {
+    background: transparent; color: var(--white);
+    border: 1.5px solid rgba(255,255,255,.35);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.6); }
+  .btn-dark {
+    background: var(--navy-800); color: var(--white);
+  }
+  .btn-dark:hover { background: var(--navy-700); transform: translateY(-2px); }
+  .btn .arrow { transition: transform .25s var(--ease); }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  /* ============ LOGO (Inline SVG re-creation) ============ */
+  .fel-logo { display: inline-flex; align-items: center; }
+  .fel-logo svg { height: 44px; width: auto; }
+
+  /* ============ NAVBAR ============ */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 0;
+    background: rgba(7,24,43,0); backdrop-filter: blur(0);
+    transition: background .3s var(--ease), padding .3s var(--ease), backdrop-filter .3s var(--ease);
+  }
+  .nav.scrolled {
+    background: rgba(7,24,43,.86); backdrop-filter: blur(14px);
+    padding: 12px 0; box-shadow: 0 6px 20px rgba(0,0,0,.2);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+  .nav-links { display: flex; align-items: center; gap: 36px; }
+  .nav-links a {
+    color: rgba(255,255,255,.85); font-weight: 500; font-size: .95rem;
+    position: relative; padding: 6px 0;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a::after {
+    content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+    background: var(--blue-500); transition: width .25s var(--ease);
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta { display: flex; align-items: center; gap: 16px; }
+  .nav-phone {
+    color: rgba(255,255,255,.9); font-size: .92rem; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .nav-phone svg { width: 16px; height: 16px; color: var(--blue-500); }
+  .hamburger {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16);
+  }
+  .hamburger svg { width: 20px; height: 20px; color: var(--white); }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative; min-height: 100vh; padding: 160px 0 90px;
+    color: var(--white); overflow: hidden;
+    background:
+      radial-gradient(60% 80% at 80% 30%, rgba(41,171,226,.22) 0%, rgba(41,171,226,0) 60%),
+      radial-gradient(45% 55% at 15% 75%, rgba(125,212,245,.14) 0%, rgba(125,212,245,0) 70%),
+      linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 50%, var(--navy-700) 100%);
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.10) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 80% 60% at 70% 40%, #000 30%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 70% 40%, #000 30%, transparent 78%);
+    opacity: .55; pointer-events: none;
+  }
+  .hero-grid {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: 1.15fr .85fr; gap: 60px; align-items: center;
+  }
+  .hero-copy h1 { color: var(--white); }
+  .hero-copy h1 .accent-blue { color: var(--blue-400); }
+  .hero-copy .lead {
+    font-size: 1.1rem; color: rgba(255,255,255,.78); max-width: 540px;
+    margin-bottom: 32px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 56px; padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,.12);
+  }
+  .hero-stats .stat strong {
+    display: block; font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: 2rem; color: var(--white);
+  }
+  .hero-stats .stat span { color: rgba(255,255,255,.6); font-size: .85rem; }
+
+  .hero-cards { display: grid; gap: 18px; }
+  .country-card {
+    backdrop-filter: blur(14px);
+    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: var(--radius-lg);
+    padding: 22px 26px;
+    display: flex; align-items: center; gap: 18px;
+    transition: transform .35s var(--ease), border-color .35s var(--ease), background .35s var(--ease);
+  }
+  .country-card:hover {
+    transform: translateY(-4px); border-color: rgba(41,171,226,.55);
+    background: linear-gradient(135deg, rgba(41,171,226,.16), rgba(255,255,255,.04));
+  }
+  .country-card .flag {
+    width: 64px; height: 64px; border-radius: 16px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .country-card h3 { color: var(--white); margin: 0 0 4px; font-size: 1.25rem; }
+  .country-card span { color: rgba(255,255,255,.7); font-size: .85rem; }
+  .country-card .arrow-circ {
+    margin-left: auto; width: 38px; height: 38px; border-radius: 50%;
+    background: var(--blue-500); display: flex; align-items: center; justify-content: center;
+    color: var(--white);
+  }
+
+  /* ============ FEATURE STRIP ============ */
+  .features {
+    background: var(--grey-100); padding: 70px 0;
+    position: relative;
+  }
+  .features-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: stretch; }
+  .feat {
+    background: var(--white); border-radius: var(--radius-md); padding: 32px;
+    box-shadow: var(--shadow-sm); border: 1px solid rgba(7,24,43,.05);
+    display: flex; gap: 18px; align-items: flex-start;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .feat:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .feat .ic {
+    width: 54px; height: 54px; border-radius: 14px; flex-shrink: 0;
+    background: var(--blue-50); color: var(--blue-500);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feat .ic svg { width: 26px; height: 26px; }
+  .feat h3 { margin: 0 0 6px; font-size: 1.1rem; }
+  .feat p { margin: 0; font-size: .92rem; color: var(--grey-500); }
+  .feat.cta-card {
+    background: var(--navy-800); color: var(--white);
+    align-items: center; justify-content: space-between; gap: 14px;
+  }
+  .feat.cta-card .phone-ic {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--blue-500); color: var(--white);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .feat.cta-card .phone-ic svg { width: 24px; height: 24px; }
+  .feat.cta-card .phone-info { flex: 1; }
+  .feat.cta-card span { color: rgba(255,255,255,.65); font-size: .78rem; text-transform: uppercase; letter-spacing: .14em; }
+  .feat.cta-card strong { display: block; font-size: 1.2rem; margin-top: 2px; }
+
+  /* ============ SECTION SHELL ============ */
+  section.block { padding: 100px 0; }
+  section.block.alt { background: var(--grey-100); }
+  section.block.dark { background: var(--navy-900); color: var(--white); }
+  section.block.dark p { color: rgba(255,255,255,.7); }
+  section.block.dark h2 { color: var(--white); }
+
+  /* ============ ABOUT ============ */
+  .about-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 70px; align-items: center; }
+  .about-visual {
+    position: relative; aspect-ratio: 4/5; max-height: 560px;
+    border-radius: var(--radius-xl); overflow: hidden;
+    background:
+      linear-gradient(135deg, rgba(7,24,43,.35), rgba(7,24,43,.05)),
+      url('https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1100&q=80') center/cover;
+    box-shadow: var(--shadow-lg);
+  }
+  .about-badge {
+    position: absolute; left: -28px; bottom: -28px;
+    background: var(--white); border-radius: var(--radius-lg);
+    padding: 18px 22px; box-shadow: var(--shadow-md);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .about-badge .stars { color: #f5b301; letter-spacing: 2px; font-size: 1.1rem; }
+  .about-badge strong { display: block; font-size: 1.25rem; }
+  .about-badge span { color: var(--grey-500); font-size: .82rem; }
+  .about-badge .avatars { display: flex; }
+  .about-badge .avatars span {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--blue-500); color: var(--white); font-weight: 700; font-size: .78rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 2px solid var(--white); margin-left: -10px;
+  }
+  .about-badge .avatars span:first-child { margin-left: 0; background: var(--navy-700); }
+  .about-badge .avatars span:nth-child(2) { background: var(--blue-400); }
+  .about-badge .avatars span:nth-child(3) { background: var(--navy-800); }
+  .about-copy h2 .accent { color: var(--blue-500); }
+  .about-copy ul { list-style: none; padding: 0; margin: 24px 0 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  .about-copy li {
+    font-size: .95rem; font-weight: 500; color: var(--navy-800);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .about-copy li svg { width: 18px; height: 18px; color: var(--blue-500); flex-shrink: 0; }
+
+  /* ============ COUNTERS ============ */
+  .counters {
+    background:
+      linear-gradient(135deg, rgba(7,24,43,.92), rgba(13,37,53,.88)),
+      url('https://images.unsplash.com/photo-1577086664693-894d8405334a?auto=format&fit=crop&w=1600&q=80') center/cover;
+    color: var(--white); padding: 90px 0;
+  }
+  .counters .container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+  .count {
+    text-align: center; padding: 30px 16px;
+    border-right: 1px solid rgba(255,255,255,.10);
+  }
+  .count:last-child { border-right: 0; }
+  .count .num {
+    font-family: 'Manrope', sans-serif; font-weight: 800;
+    font-size: clamp(2.4rem, 4.5vw, 3.6rem); color: var(--white);
+    line-height: 1;
+  }
+  .count .num .plus { color: var(--blue-500); }
+  .count .label { color: rgba(255,255,255,.7); margin-top: 12px; font-size: .92rem; letter-spacing: .04em; }
+
+  /* ============ SERVICES — featured carousel + grid ============ */
+  .services-head { text-align: center; max-width: 720px; margin: 0 auto 50px; }
+  .services-head p { max-width: 580px; margin: 14px auto 0; }
+
+  .service-carousel {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+    margin-bottom: 60px;
+  }
+  .svc-card {
+    position: relative; border-radius: var(--radius-lg); overflow: hidden;
+    aspect-ratio: 4/5; box-shadow: var(--shadow-md);
+    cursor: pointer; transform: translateZ(0);
+    transition: transform .4s var(--ease);
+  }
+  .svc-card:hover { transform: translateY(-6px); }
+  .svc-card::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(7,24,43,.1) 30%, rgba(7,24,43,.85) 100%);
+    z-index: 1; transition: background .35s var(--ease);
+  }
+  .svc-card:hover::before {
+    background: linear-gradient(180deg, rgba(41,171,226,.2) 0%, rgba(7,24,43,.92) 100%);
+  }
+  .svc-card .bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform .8s var(--ease); }
+  .svc-card:hover .bg { transform: scale(1.06); }
+  .svc-card .body {
+    position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
+    padding: 28px; color: var(--white);
+  }
+  .svc-card .ic {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--blue-500); color: var(--white);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
+    box-shadow: 0 12px 28px -8px rgba(41,171,226,.6);
+  }
+  .svc-card .ic svg { width: 28px; height: 28px; }
+  .svc-card h3 { color: var(--white); margin: 0 0 8px; font-size: 1.4rem; }
+  .svc-card p { color: rgba(255,255,255,.78); font-size: .92rem; margin: 0 0 14px; }
+  .svc-card .read {
+    font-weight: 600; font-size: .9rem; color: var(--blue-300);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+
+  .svc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .svc-tile {
+    background: var(--white); border: 1px solid rgba(7,24,43,.07);
+    border-radius: var(--radius-md); padding: 26px 22px;
+    transition: transform .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .svc-tile:hover { transform: translateY(-4px); border-color: var(--blue-500); box-shadow: var(--shadow-md); }
+  .svc-tile .ic {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--blue-50); color: var(--blue-500);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+  }
+  .svc-tile .ic svg { width: 22px; height: 22px; }
+  .svc-tile h4 { font-size: 1.05rem; margin: 0 0 6px; font-family: 'Manrope', sans-serif; }
+  .svc-tile p { font-size: .87rem; color: var(--grey-500); margin: 0; }
+
+  /* ============ INDUSTRIES ============ */
+  .industries { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+  .ind {
+    background: var(--white); border-radius: var(--radius-md);
+    padding: 28px 16px; text-align: center;
+    border: 1px solid rgba(7,24,43,.06);
+    transition: transform .25s var(--ease), background .25s var(--ease), color .25s var(--ease);
+  }
+  .ind:hover { transform: translateY(-4px); background: var(--navy-800); color: var(--white); }
+  .ind:hover svg { color: var(--blue-400); }
+  .ind svg { width: 36px; height: 36px; color: var(--blue-500); margin-bottom: 12px; }
+  .ind span { display: block; font-weight: 600; font-size: .92rem; }
+
+  /* ============ PROCESS TIMELINE ============ */
+  .process { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; position: relative; }
+  .process::before {
+    content: ""; position: absolute; top: 36px; left: 8%; right: 8%; height: 2px;
+    background: repeating-linear-gradient(90deg, var(--blue-500) 0 6px, transparent 6px 14px);
+    z-index: 0;
+  }
+  .step { text-align: center; position: relative; z-index: 1; }
+  .step .num {
+    width: 74px; height: 74px; border-radius: 50%;
+    background: var(--white); color: var(--blue-500);
+    font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px; border: 2px solid var(--blue-500);
+    box-shadow: 0 12px 24px -10px rgba(41,171,226,.5);
+    transition: transform .25s var(--ease), background .25s var(--ease), color .25s var(--ease);
+  }
+  .step:hover .num { transform: scale(1.06); background: var(--blue-500); color: var(--white); }
+  .step h4 { font-size: 1.1rem; margin: 0 0 6px; }
+  .step p { font-size: .88rem; color: var(--grey-500); margin: 0; }
+
+  /* ============ NETWORK MAP ============ */
+  .network { position: relative; }
+  .map-wrap {
+    position: relative; max-width: 1100px; margin: 0 auto;
+    padding: 50px; border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, rgba(41,171,226,.06), rgba(7,24,43,.02));
+    border: 1px solid rgba(41,171,226,.18);
+  }
+  .map-svg { width: 100%; height: auto; }
+  .map-svg .dot { fill: var(--navy-800); }
+  .map-svg .hub { fill: var(--blue-500); }
+  .map-legend {
+    display: flex; gap: 28px; justify-content: center; margin-top: 30px;
+    font-size: .9rem; color: var(--grey-700);
+  }
+  .map-legend .key {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .map-legend .key .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--blue-500);
+  }
+  .map-legend .key.secondary .dot { background: var(--navy-800); }
+
+  /* ============ TESTIMONIALS ============ */
+  .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .testi {
+    background: var(--white); border-radius: var(--radius-lg);
+    padding: 36px 30px 30px; box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(7,24,43,.05); position: relative;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .testi:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+  .testi .quote-mark {
+    position: absolute; top: -20px; right: 26px;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--blue-500); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 800;
+  }
+  .testi .stars { color: #f5b301; letter-spacing: 2px; margin-bottom: 14px; }
+  .testi blockquote {
+    margin: 0 0 22px; padding: 0; color: var(--navy-800);
+    font-size: 1rem; line-height: 1.7;
+  }
+  .testi-foot { display: flex; align-items: center; gap: 14px; padding-top: 20px; border-top: 1px solid rgba(7,24,43,.07); }
+  .testi-foot .ava {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--blue-500); color: var(--white); font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .testi-foot strong { display: block; }
+  .testi-foot span { color: var(--grey-500); font-size: .82rem; text-transform: uppercase; letter-spacing: .12em; }
+
+  /* ============ CONTACT ============ */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 60px; align-items: start; }
+  .contact-info p { margin: 14px 0 30px; }
+  .contact-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+  .contact-list li { display: flex; gap: 16px; align-items: flex-start; }
+  .contact-list .ic {
+    width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+    background: var(--blue-50); color: var(--blue-500);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .contact-list .ic svg { width: 22px; height: 22px; }
+  .contact-list strong { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .15em; color: var(--grey-500); margin-bottom: 2px; }
+  .contact-list span { color: var(--navy-800); font-weight: 500; font-size: .98rem; }
+
+  .contact-form {
+    background: var(--white); border-radius: var(--radius-lg);
+    padding: 36px; box-shadow: var(--shadow-md);
+    border: 1px solid rgba(7,24,43,.06);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .field { display: block; }
+  .field label {
+    display: block; font-size: .78rem; font-weight: 600;
+    color: var(--grey-500); text-transform: uppercase; letter-spacing: .14em;
+    margin-bottom: 6px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 14px 16px; font: inherit;
+    background: var(--grey-100); border: 1px solid transparent;
+    border-radius: var(--radius-sm); color: var(--navy-800);
+    transition: border-color .2s, background .2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--blue-500); background: var(--white);
+  }
+  .field textarea { min-height: 130px; resize: vertical; }
+
+  /* ============ FOOTER ============ */
+  footer {
+    background: var(--navy-900); color: rgba(255,255,255,.7);
+    padding: 80px 0 0;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.2fr; gap: 40px;
+    padding-bottom: 60px; border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .footer-top h4 {
+    color: var(--white); margin: 0 0 22px; font-size: 1.05rem;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .footer-top h4 svg { width: 16px; height: 16px; color: var(--blue-500); }
+  .footer-top p { color: rgba(255,255,255,.6); font-size: .92rem; }
+  .footer-top ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .footer-top ul a {
+    color: rgba(255,255,255,.7); font-size: .92rem;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: color .2s, transform .2s;
+  }
+  .footer-top ul a:hover { color: var(--blue-400); transform: translateX(4px); }
+  .footer-top ul svg { width: 12px; height: 12px; }
+  .footer-contact li { font-size: .92rem; color: rgba(255,255,255,.7); margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .footer-contact li svg { width: 16px; height: 16px; color: var(--blue-500); flex-shrink: 0; margin-top: 3px; }
+  .subscribe-form {
+    display: flex; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 999px; padding: 4px; margin-top: 16px;
+  }
+  .subscribe-form input {
+    flex: 1; background: transparent; border: 0; color: var(--white);
+    padding: 12px 18px; font: inherit; outline: none;
+  }
+  .subscribe-form input::placeholder { color: rgba(255,255,255,.4); }
+  .subscribe-form button {
+    background: var(--blue-500); color: var(--white);
+    border-radius: 999px; padding: 12px 22px; font-weight: 600; font-size: .9rem;
+  }
+  .subscribe-form button:hover { background: var(--blue-400); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 24px 0; flex-wrap: wrap; gap: 16px;
+    font-size: .88rem; color: rgba(255,255,255,.55);
+  }
+  .socials { display: flex; gap: 10px; }
+  .socials a {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .2s, transform .2s;
+  }
+  .socials a:hover { background: var(--blue-500); transform: translateY(-2px); }
+  .socials a svg { width: 16px; height: 16px; color: var(--white); }
+
+  /* ============ FLOATING ELEMENTS ============ */
+  .whatsapp {
+    position: fixed; bottom: 28px; right: 28px; z-index: 90;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--green-whatsapp); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 12px 28px -8px rgba(37,211,102,.5);
+    transition: transform .25s var(--ease);
+  }
+  .whatsapp:hover { transform: scale(1.08); }
+  .whatsapp svg { width: 28px; height: 28px; }
+  .whatsapp::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--green-whatsapp); opacity: .5;
+    animation: ping 2s var(--ease) infinite;
+  }
+  @keyframes ping { 0% { transform: scale(.9); opacity: .6; } 100% { transform: scale(1.5); opacity: 0; } }
+
+  .go-top {
+    position: fixed; right: 28px; bottom: 96px; z-index: 89;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--navy-800); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s var(--ease);
+  }
+  .go-top.show { opacity: 1; pointer-events: auto; }
+  .go-top:hover { transform: translateY(-3px); background: var(--blue-500); }
+
+  /* ============ REVEAL ANIMATION ============ */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1024px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-cards { grid-template-columns: 1fr 1fr; }
+    .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .service-carousel { grid-template-columns: 1fr 1fr; }
+    .svc-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .industries { grid-template-columns: repeat(3, 1fr); }
+    .process { grid-template-columns: 1fr 1fr; }
+    .process::before { display: none; }
+    .testi-grid { grid-template-columns: 1fr 1fr; }
+    .counters .container { grid-template-columns: 1fr 1fr; }
+    .count { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.10); padding-bottom: 30px; }
+    .count:nth-last-child(-n+2) { border-bottom: 0; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 720px) {
+    section.block { padding: 70px 0; }
+    .nav-links, .nav-phone { display: none; }
+    .hamburger { display: inline-flex; }
+    .hero { padding: 130px 0 70px; }
+    .hero-cards { grid-template-columns: 1fr; }
+    .hero-stats { gap: 26px; flex-wrap: wrap; }
+    .features-grid { grid-template-columns: 1fr; }
+    .service-carousel { grid-template-columns: 1fr; }
+    .svc-grid { grid-template-columns: 1fr 1fr; }
+    .industries { grid-template-columns: 1fr 1fr; }
+    .process { grid-template-columns: 1fr; }
+    .testi-grid { grid-template-columns: 1fr; }
+    .about-copy ul { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr; }
+    .about-badge { left: 16px; bottom: 16px; right: 16px; }
+  }
+
+  /* Mobile menu drawer */
+  .drawer {
+    position: fixed; inset: 0; background: rgba(7,24,43,.96); backdrop-filter: blur(16px);
+    z-index: 110; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 30px; opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .drawer.open { opacity: 1; pointer-events: auto; }
+  .drawer a { color: var(--white); font-size: 1.4rem; font-weight: 600; }
+  .drawer .close { position: absolute; top: 24px; right: 24px; color: var(--white); width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- ============ Reusable FEL Logo SVG ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="fel-logo" viewBox="0 0 240 70">
+      <text x="0" y="46" font-family="Manrope, Inter, sans-serif" font-size="56" font-weight="900" letter-spacing="-1" fill="var(--logo-text, #4a4a4a)">FEL</text>
+      <!-- Blue swoosh through the L -->
+      <path d="M118 46 Q145 8 175 28" stroke="#29abe2" stroke-width="5" fill="none" stroke-linecap="round" />
+      <path d="M168 22 L178 28 L172 38" stroke="#29abe2" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="0" y="64" font-family="Inter, sans-serif" font-size="11" font-weight="700" letter-spacing="2.4" fill="#29abe2">INTERNATIONAL  SHIPPING</text>
+      <!-- Speed lines -->
+      <line x1="180" y1="58" x2="200" y2="52" stroke="#cdd6e0" stroke-width="2" stroke-linecap="round" />
+      <line x1="190" y1="62" x2="210" y2="56" stroke="#cdd6e0" stroke-width="2" stroke-linecap="round" />
+      <line x1="200" y1="66" x2="220" y2="60" stroke="#29abe2" stroke-width="2" stroke-linecap="round" />
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#" class="fel-logo" aria-label="FEL International Shipping">
+      <svg style="--logo-text:#ffffff"><use href="#fel-logo"/></svg>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#network">Network</a>
+      <a href="#testimonials">Clients</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-cta">
+      <span class="nav-phone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        +91 954 421 2353
+      </span>
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="drawer" id="drawer">
+  <button class="close" id="drawerClose" aria-label="Close menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <a href="#home" data-drawer>Home</a>
+  <a href="#about" data-drawer>About</a>
+  <a href="#services" data-drawer>Services</a>
+  <a href="#network" data-drawer>Network</a>
+  <a href="#testimonials" data-drawer>Clients</a>
+  <a href="#contact" data-drawer>Contact</a>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="home">
+  <div class="container hero-grid">
+    <div class="hero-copy reveal">
+      <span class="eyebrow light">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg>
+        Modern Logistic Transport
+      </span>
+      <h1>Move Cargo Anywhere.<br/><span class="accent-blue">Worldwide. On Time.</span></h1>
+      <p class="lead">FEL International Shipping connects UAE, India, and the GCC with the rest of the world — Air, Sea, Land, Door-to-Door and Customs Clearance, handled by specialists who treat your freight like their own.</p>
+      <div class="hero-actions">
+        <a href="#services" class="btn btn-primary">Explore Services <span class="arrow">→</span></a>
+        <a href="#contact" class="btn btn-ghost">Get a Quote</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>15+</strong><span>Years in Logistics</span></div>
+        <div class="stat"><strong>120+</strong><span>Countries Served</span></div>
+        <div class="stat"><strong>24/7</strong><span>Operations Support</span></div>
+      </div>
+    </div>
+    <div class="hero-cards reveal">
+      <div class="country-card">
+        <div class="flag">🇦🇪</div>
+        <div>
+          <h3>UAE</h3>
+          <span>Logistic Service Provider</span>
+        </div>
+        <span class="arrow-circ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </div>
+      <div class="country-card">
+        <div class="flag">🇮🇳</div>
+        <div>
+          <h3>India</h3>
+          <span>Logistic Service Provider</span>
+        </div>
+        <span class="arrow-circ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </div>
+      <div class="country-card">
+        <div class="flag">🌍</div>
+        <div>
+          <h3>GCC + Worldwide</h3>
+          <span>Global Freight Network</span>
+        </div>
+        <span class="arrow-circ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ FEATURES STRIP ============ -->
+<section class="features">
+  <div class="container features-grid">
+    <div class="feat reveal">
+      <div class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div>
+        <h3>Worldwide Service</h3>
+        <p>Trusted agents in 120+ countries, integrated air, sea, and land lanes with real-time tracking.</p>
+      </div>
+    </div>
+    <div class="feat reveal">
+      <div class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </div>
+      <div>
+        <h3>24/7 Online Support</h3>
+        <p>Dedicated coordinators, multilingual desks, and live status updates from quote to delivery.</p>
+      </div>
+    </div>
+    <div class="feat cta-card reveal">
+      <div class="phone-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div class="phone-info">
+        <span>Make a Phone Call</span>
+        <strong>+91 954 421 2353</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="block" id="about">
+  <div class="container about-grid">
+    <div class="about-visual reveal">
+      <div class="about-badge">
+        <div class="avatars"><span>A</span><span>R</span><span>M</span></div>
+        <div>
+          <strong>4.8 / 5</strong>
+          <div class="stars">★★★★★</div>
+          <span>Customer Satisfied · 15k Reviews</span>
+        </div>
+      </div>
+    </div>
+    <div class="about-copy reveal">
+      <span class="eyebrow">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg>
+        Our Company
+      </span>
+      <h2 class="h2-stack">Our Expertise Stands in<br/><span class="accent">Logistics Solutions</span></h2>
+      <p>We deal with both the intricate logistics and freight forwarding requirements of major projects as well as smaller establishments. From single shipments to enterprise supply-chain programmes — FEL is the partner that simplifies global trade.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Multi-modal Freight</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Customs Brokerage</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Door-to-Door Delivery</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Warehousing & 3PL</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Personal Effects</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> GCC Express Lanes</li>
+      </ul>
+      <a href="#contact" class="btn btn-primary">About Us <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COUNTERS ============ -->
+<section class="counters">
+  <div class="container">
+    <div class="count reveal">
+      <div class="num"><span data-count="15000">0</span><span class="plus">+</span></div>
+      <div class="label">Shipments Delivered</div>
+    </div>
+    <div class="count reveal">
+      <div class="num"><span data-count="120">0</span><span class="plus">+</span></div>
+      <div class="label">Countries Connected</div>
+    </div>
+    <div class="count reveal">
+      <div class="num"><span data-count="850">0</span><span class="plus">+</span></div>
+      <div class="label">Enterprise Clients</div>
+    </div>
+    <div class="count reveal">
+      <div class="num"><span data-count="99">0</span><span style="font-size:.6em">%</span></div>
+      <div class="label">On-Time Performance</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section class="block alt" id="services">
+  <div class="container">
+    <div class="services-head reveal">
+      <span class="eyebrow center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Our Services</span>
+      <h2 class="h2-stack">Efficient Logistics Solutions for Your<br/><span class="accent">Business</span></h2>
+      <p>From the runway to the warehouse, from a single carton to a full charter — every service runs on the same promise: clear pricing, careful handling, and visibility from collection to consignee.</p>
+    </div>
+
+    <!-- Featured carousel of 3 hero services -->
+    <div class="service-carousel">
+      <article class="svc-card reveal">
+        <div class="bg" style="background-image:url('https://images.unsplash.com/photo-1583878461550-d8eb4f1d83b5?auto=format&fit=crop&w=900&q=80')"></div>
+        <div class="body">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg>
+          </div>
+          <h3>Air Freight</h3>
+          <p>Time-critical cargo moved on scheduled and charter flights with prioritised customs clearance.</p>
+          <a class="read" href="#contact">Read More <span>→</span></a>
+        </div>
+      </article>
+      <article class="svc-card reveal">
+        <div class="bg" style="background-image:url('https://images.unsplash.com/photo-1605745341112-85968b19335b?auto=format&fit=crop&w=900&q=80')"></div>
+        <div class="body">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14l2.5-2.5L9 14l3-3 3 3 3.5-2.5L21 14"/><path d="M3 18l2 1 3-1 3 1 3-1 3 1 3-1 2 1"/><path d="M5 12V6l7-3 7 3v6"/></svg>
+          </div>
+          <h3>Sea Freight</h3>
+          <p>FCL, LCL, and break-bulk options — competitive ocean rates with consolidated lanes across GCC.</p>
+          <a class="read" href="#contact">Read More <span>→</span></a>
+        </div>
+      </article>
+      <article class="svc-card reveal">
+        <div class="bg" style="background-image:url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=900&q=80')"></div>
+        <div class="body">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <h3>Land Freight</h3>
+          <p>FTL, LTL, and refrigerated road transport across the GCC corridor with GPS-tracked fleets.</p>
+          <a class="read" href="#contact">Read More <span>→</span></a>
+        </div>
+      </article>
+    </div>
+
+    <!-- Compact grid of remaining services -->
+    <div class="svc-grid">
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <h4>Door-to-Door</h4>
+        <p>End-to-end pickup and delivery with single-window accountability.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 5-3.5 9-9 9s-9-4-9-9 3.5-9 9-9c2.4 0 4.6 1 6.3 2.6"/></svg></div>
+        <h4>Customs Clearance</h4>
+        <p>Licensed brokers handling HS classification, duty, and compliance.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <h4>Warehousing</h4>
+        <p>Bonded and dry storage with pick, pack, and inventory management.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+        <h4>Commercial Cargo</h4>
+        <p>B2B freight programmes for retailers, distributors, and manufacturers.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6"/><path d="M16 21l3-3 3 3"/><path d="M19 18v-6"/></svg></div>
+        <h4>Personal Effects</h4>
+        <p>Household relocations and personal shipments with white-glove care.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <h4>Express Delivery</h4>
+        <p>Same-day, next-day, and time-definite cargo across the GCC.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+        <h4>Import / Export</h4>
+        <p>Full-cycle documentation, banking, and incoterm advisory.</p>
+      </div>
+      <div class="svc-tile reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></div>
+        <h4>GCC Freight</h4>
+        <p>Specialised lanes connecting UAE, KSA, Oman, Qatar, Kuwait, Bahrain.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INDUSTRIES ============ -->
+<section class="block" id="industries">
+  <div class="container">
+    <div class="services-head reveal">
+      <span class="eyebrow center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Industries We Serve</span>
+      <h2 class="h2-stack">Tailored Freight for Every<br/><span class="accent">Sector</span></h2>
+    </div>
+    <div class="industries">
+      <div class="ind reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>Retail & FMCG</span></div>
+      <div class="ind reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7z"/></svg><span>Pharma & Healthcare</span></div>
+      <div class="ind reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/></svg><span>Automotive</span></div>
+      <div class="ind reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Oil & Gas</span></div>
+      <div class="ind reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Technology</span></div>
+      <div class="ind reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Construction</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS TIMELINE ============ -->
+<section class="block alt" id="process">
+  <div class="container">
+    <div class="services-head reveal">
+      <span class="eyebrow center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> How We Work</span>
+      <h2 class="h2-stack">A Simple, Predictable<br/><span class="accent">Process</span></h2>
+    </div>
+    <div class="process">
+      <div class="step reveal">
+        <div class="num">01</div>
+        <h4>Quote</h4>
+        <p>Tell us origin, destination, and cargo — we send a transparent quote within 2 hours.</p>
+      </div>
+      <div class="step reveal">
+        <div class="num">02</div>
+        <h4>Pickup</h4>
+        <p>Our team collects, labels, and prepares your cargo at origin with full documentation.</p>
+      </div>
+      <div class="step reveal">
+        <div class="num">03</div>
+        <h4>Transit</h4>
+        <p>Live tracking, customs clearance, and proactive updates at every milestone.</p>
+      </div>
+      <div class="step reveal">
+        <div class="num">04</div>
+        <h4>Delivery</h4>
+        <p>Door-to-door handover with signed proof of delivery and a satisfaction check.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NETWORK MAP ============ -->
+<section class="block network" id="network">
+  <div class="container">
+    <div class="services-head reveal">
+      <span class="eyebrow center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Global Network</span>
+      <h2 class="h2-stack">Our Hubs &amp; Lanes Across the<br/><span class="accent">World</span></h2>
+      <p>Hubs in Cochin, Dubai and Sharjah — connected lanes to North America, Europe, Africa, Asia-Pacific, and the wider GCC.</p>
+    </div>
+    <div class="map-wrap reveal">
+      <svg class="map-svg" viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Dotted world map (stylised) -->
+        <g>
+          <!-- A grid of dots approximating continents -->
+          <g class="dot" fill="#0d2535" opacity=".35">
+            <!-- North America -->
+            <circle cx="150" cy="120" r="3"/><circle cx="170" cy="115" r="3"/><circle cx="190" cy="115" r="3"/><circle cx="210" cy="120" r="3"/><circle cx="180" cy="135" r="3"/><circle cx="200" cy="135" r="3"/><circle cx="220" cy="140" r="3"/><circle cx="160" cy="150" r="3"/><circle cx="180" cy="150" r="3"/><circle cx="200" cy="150" r="3"/><circle cx="220" cy="160" r="3"/><circle cx="240" cy="170" r="3"/><circle cx="195" cy="170" r="3"/><circle cx="215" cy="180" r="3"/><circle cx="235" cy="195" r="3"/>
+            <!-- South America -->
+            <circle cx="265" cy="250" r="3"/><circle cx="275" cy="270" r="3"/><circle cx="285" cy="290" r="3"/><circle cx="295" cy="310" r="3"/><circle cx="280" cy="330" r="3"/><circle cx="290" cy="350" r="3"/><circle cx="260" cy="290" r="3"/><circle cx="275" cy="250" r="3"/>
+            <!-- Europe -->
+            <circle cx="470" cy="120" r="3"/><circle cx="490" cy="115" r="3"/><circle cx="510" cy="120" r="3"/><circle cx="530" cy="125" r="3"/><circle cx="500" cy="135" r="3"/><circle cx="480" cy="145" r="3"/><circle cx="520" cy="145" r="3"/><circle cx="540" cy="135" r="3"/>
+            <!-- Africa -->
+            <circle cx="500" cy="200" r="3"/><circle cx="520" cy="220" r="3"/><circle cx="510" cy="240" r="3"/><circle cx="530" cy="260" r="3"/><circle cx="520" cy="280" r="3"/><circle cx="540" cy="300" r="3"/><circle cx="510" cy="320" r="3"/><circle cx="490" cy="280" r="3"/><circle cx="480" cy="220" r="3"/>
+            <!-- Middle East -->
+            <circle cx="570" cy="190" r="3"/><circle cx="585" cy="200" r="3"/><circle cx="600" cy="210" r="3"/>
+            <!-- Asia -->
+            <circle cx="620" cy="150" r="3"/><circle cx="650" cy="140" r="3"/><circle cx="680" cy="130" r="3"/><circle cx="700" cy="150" r="3"/><circle cx="720" cy="160" r="3"/><circle cx="740" cy="170" r="3"/><circle cx="700" cy="180" r="3"/><circle cx="720" cy="190" r="3"/><circle cx="680" cy="200" r="3"/><circle cx="660" cy="200" r="3"/><circle cx="700" cy="220" r="3"/><circle cx="730" cy="220" r="3"/><circle cx="760" cy="200" r="3"/><circle cx="780" cy="220" r="3"/>
+            <!-- Australia -->
+            <circle cx="800" cy="320" r="3"/><circle cx="820" cy="330" r="3"/><circle cx="840" cy="340" r="3"/><circle cx="860" cy="335" r="3"/><circle cx="830" cy="345" r="3"/>
+          </g>
+          <!-- Hub points -->
+          <g>
+            <circle class="hub" cx="630" cy="200" r="8"/>
+            <circle cx="630" cy="200" r="14" fill="none" stroke="#29abe2" stroke-width="2" opacity=".5">
+              <animate attributeName="r" from="8" to="24" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" from=".7" to="0" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <text x="640" y="195" font-family="Inter" font-size="12" font-weight="700" fill="#0d2535">Cochin · India</text>
+
+            <circle class="hub" cx="585" cy="190" r="8"/>
+            <circle cx="585" cy="190" r="14" fill="none" stroke="#29abe2" stroke-width="2" opacity=".5">
+              <animate attributeName="r" from="8" to="24" dur="2.3s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" from=".7" to="0" dur="2.3s" repeatCount="indefinite"/>
+            </circle>
+            <text x="510" y="178" font-family="Inter" font-size="12" font-weight="700" fill="#0d2535">Dubai · UAE</text>
+          </g>
+          <!-- Connection lanes -->
+          <g stroke="#29abe2" stroke-width="1.5" fill="none" opacity=".7" stroke-dasharray="4 6">
+            <path d="M585 190 Q 400 80 200 130"/>
+            <path d="M585 190 Q 380 250 280 290"/>
+            <path d="M585 190 Q 540 130 500 125"/>
+            <path d="M630 200 Q 690 200 740 180"/>
+            <path d="M630 200 Q 720 270 830 330"/>
+            <path d="M585 190 Q 540 240 510 290"/>
+          </g>
+        </g>
+      </svg>
+      <div class="map-legend">
+        <span class="key"><span class="dot"></span> FEL Hub</span>
+        <span class="key secondary"><span class="dot"></span> Connected Country</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="block alt" id="testimonials">
+  <div class="container">
+    <div class="services-head reveal">
+      <span class="eyebrow center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Client Testimonial</span>
+      <h2 class="h2-stack">What Our Customers Say<br/><span class="accent">About Us</span></h2>
+    </div>
+    <div class="testi-grid">
+      <article class="testi reveal">
+        <div class="quote-mark">”</div>
+        <div class="stars">★★★★★</div>
+        <blockquote>FEL handled our pharma cold-chain shipment from Cochin to Dubai with zero excursions. Their customs team had paperwork ready before the plane even landed.</blockquote>
+        <div class="testi-foot">
+          <div class="ava">AR</div>
+          <div>
+            <strong>Anita Rao</strong>
+            <span>Manager · MedFlow Logistics</span>
+          </div>
+        </div>
+      </article>
+      <article class="testi reveal">
+        <div class="quote-mark">”</div>
+        <div class="stars">★★★★★</div>
+        <blockquote>We've used FEL for two years across LCL, FCL, and air. Pricing is honest, updates are constant, and the GCC corridor is their bread and butter.</blockquote>
+        <div class="testi-foot">
+          <div class="ava">MK</div>
+          <div>
+            <strong>Mohammed Khalid</strong>
+            <span>Manager · Gulf Retail Group</span>
+          </div>
+        </div>
+      </article>
+      <article class="testi reveal">
+        <div class="quote-mark">”</div>
+        <div class="stars">★★★★★</div>
+        <blockquote>Personal relocation from Kerala to Sharjah — they packed, shipped, cleared customs, and delivered to my new flat. Hands-down the calmest move I've had.</blockquote>
+        <div class="testi-foot">
+          <div class="ava">SP</div>
+          <div>
+            <strong>Sandeep Pillai</strong>
+            <span>Manager · Independent Client</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="block" id="contact">
+  <div class="container contact-grid">
+    <div class="contact-info reveal">
+      <span class="eyebrow"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Get In Touch</span>
+      <h2 class="h2-stack">Ship Smarter With<br/><span class="accent">FEL Today</span></h2>
+      <p>Tell us about your shipment and one of our coordinators will respond within two business hours with a tailored quote.</p>
+      <ul class="contact-list">
+        <li>
+          <span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <div>
+            <strong>Head Office</strong>
+            <span>Building no 55/1917, Ground floor, KP Vallon Road,<br/>Kadavanthra, Cochin 682020, Kerala</span>
+          </div>
+        </li>
+        <li>
+          <span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </span>
+          <div>
+            <strong>Email</strong>
+            <span>accounts@felinternational.com</span>
+          </div>
+        </li>
+        <li>
+          <span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <div>
+            <strong>Phone</strong>
+            <span>+91 954 421 2353</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <form class="contact-form reveal" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="field">
+          <label for="fname">Full Name</label>
+          <input id="fname" type="text" required placeholder="Your name" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" required placeholder="you@company.com" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" type="tel" placeholder="+91 ..." />
+        </div>
+        <div class="field">
+          <label for="service">Service</label>
+          <select id="service">
+            <option>Air Freight</option>
+            <option>Sea Freight</option>
+            <option>Land Freight</option>
+            <option>Door-to-Door</option>
+            <option>Customs Clearance</option>
+            <option>Warehousing</option>
+            <option>Personal Effects</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:22px">
+        <label for="msg">Tell us about your shipment</label>
+        <textarea id="msg" placeholder="Origin, destination, weight/volume, cargo type, target date..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Send Enquiry <span class="arrow">→</span></button>
+      <p id="formStatus" style="margin-top:14px;font-size:.85rem;color:var(--grey-500)"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <a href="#" class="fel-logo" style="margin-bottom:20px;display:inline-flex">
+          <svg style="--logo-text:#ffffff;height:48px"><use href="#fel-logo"/></svg>
+        </a>
+        <p>We aim to deal with both the intricate logistics and freight forwarding requirements of major projects as well as smaller establishments.</p>
+        <div class="socials" style="margin-top:20px">
+          <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM8.3 18H5.7V9.7h2.6V18zM7 8.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm11 9.5h-2.6v-4c0-1-.4-1.7-1.3-1.7s-1.5.6-1.5 1.7v4h-2.6V9.7h2.6V11a3 3 0 0 1 2.6-1.4c1.9 0 3.2 1.2 3.2 3.7V18z"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.5 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.4a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg></a>
+          <a href="#" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2zm5.5 14.3c-.2.6-1.2 1.2-1.7 1.3-.4.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.5-2.6-1.1-4.3-3.7-4.4-3.9-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-1.9.9-2.2.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.4.7 1.7.7 1.8.1.1.1.3 0 .4l-.3.4-.3.3c-.1.1-.2.2-.1.4.1.2.5.9 1.1 1.5.8.7 1.4.9 1.6 1 .2.1.3.1.4-.1.1-.1.5-.6.6-.8.1-.2.3-.2.5-.1.2.1 1.3.6 1.5.7l.4.2c.1.1.1.5-.1 1z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Quick Links</h4>
+        <ul>
+          <li><a href="#home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg> Home</a></li>
+          <li><a href="#about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg> About Us</a></li>
+          <li><a href="#services"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg> Services</a></li>
+          <li><a href="#network"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg> Network</a></li>
+          <li><a href="#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg> Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Get In Touch</h4>
+        <ul class="footer-contact">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Building no 55/1917, Ground floor, KP Vallon Road, Kadavanthra, Cochin 682020, Kerala</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> accounts@felinternational.com</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg> +91 954 421 2353</li>
+        </ul>
+      </div>
+      <div>
+        <h4><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5l8 2.5z"/></svg> Subscribe Us</h4>
+        <p>Sign up for alerts, our latest blogs, thoughts, and insights.</p>
+        <form class="subscribe-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; alert('Thanks — you are subscribed.');">
+          <input type="email" placeholder="Enter your email" required />
+          <button type="submit">Subscribe →</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© Copyright 2026 FEL International Shipping. All Rights Reserved.</span>
+      <span>Made with ♥ by Weblanza</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ FLOATING ============ -->
+<a class="whatsapp" href="https://wa.me/919544212353" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2zm5.5 14.3c-.2.6-1.2 1.2-1.7 1.3-.4.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.5-2.6-1.1-4.3-3.7-4.4-3.9-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-1.9.9-2.2.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.4.7 1.7.7 1.8.1.1.1.3 0 .4l-.3.4-.3.3c-.1.1-.2.2-.1.4.1.2.5.9 1.1 1.5.8.7 1.4.9 1.6 1 .2.1.3.1.4-.1.1-.1.5-.6.6-.8.1-.2.3-.2.5-.1.2.1 1.3.6 1.5.7l.4.2c.1.1.1.5-.1 1z"/></svg>
+</a>
+<button class="go-top" id="goTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+/* ============ Nav scroll behaviour ============ */
+const nav = document.getElementById('nav');
+const goTop = document.getElementById('goTop');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  nav.classList.toggle('scrolled', y > 40);
+  goTop.classList.toggle('show', y > 700);
+});
+goTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+/* ============ Mobile drawer ============ */
+const drawer = document.getElementById('drawer');
+document.getElementById('hamburger').addEventListener('click', () => drawer.classList.add('open'));
+document.getElementById('drawerClose').addEventListener('click', () => drawer.classList.remove('open'));
+document.querySelectorAll('[data-drawer]').forEach(a => a.addEventListener('click', () => drawer.classList.remove('open')));
+
+/* ============ Reveal-on-scroll ============ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ============ Counter animation ============ */
+const counters = document.querySelectorAll('[data-count]');
+const cio = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    const target = +el.dataset.count;
+    const duration = 1600;
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.floor(eased * target).toLocaleString();
+      if (t < 1) requestAnimationFrame(step);
+      else el.textContent = target.toLocaleString();
+    }
+    requestAnimationFrame(step);
+    cio.unobserve(el);
+  });
+}, { threshold: 0.4 });
+counters.forEach(c => cio.observe(c));
+
+/* ============ Contact form (demo handler) ============ */
+function handleSubmit(e) {
+  e.preventDefault();
+  const s = document.getElementById('formStatus');
+  s.style.color = 'var(--blue-500)';
+  s.textContent = 'Thanks — your enquiry has been queued. We will respond within 2 business hours.';
+  e.target.reset();
+}
+</script>
+</body>
+</html>

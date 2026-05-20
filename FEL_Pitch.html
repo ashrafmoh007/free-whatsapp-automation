@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FEL International Shipping — Pitch Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy-900:#07182B; --navy-800:#0D2535; --navy-700:#133146;
+    --blue:#29ABE2; --blue-light:#7ED4F5;
+    --grey-100:#F0F4F8; --grey-300:#cdd6e0; --grey-500:#7c8a99; --grey-700:#4A4A4A;
+    --white:#fff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#0a0f17;font-family:'Inter',sans-serif;color:var(--grey-700);overflow:hidden;height:100%;}
+  .deck{position:relative;width:100vw;height:100vh;overflow:hidden;}
+  .slide{
+    position:absolute;inset:0;width:100%;height:100%;
+    opacity:0;pointer-events:none;
+    transform:translateX(40px);
+    transition:opacity .45s ease, transform .45s ease;
+    display:flex;flex-direction:column;
+    padding:5vh 7vw;
+  }
+  .slide.active{opacity:1;pointer-events:auto;transform:none;}
+  .slide.dark{background:linear-gradient(135deg,var(--navy-900),var(--navy-800));color:var(--white);}
+  .slide.light{background:var(--white);}
+  .slide.alt{background:var(--grey-100);}
+  h1,h2,h3,h4{font-family:'Manrope',sans-serif;margin:0;color:var(--navy-800);font-weight:800;line-height:1.1;letter-spacing:-.01em;}
+  .slide.dark h1,.slide.dark h2,.slide.dark h3{color:var(--white);}
+  h1{font-size:clamp(2.8rem,5.5vw,5rem);}
+  h2{font-size:clamp(2rem,3.6vw,3.2rem);}
+  h3{font-size:1.5rem;}
+  p{font-size:1.15rem;line-height:1.6;color:var(--grey-700);margin:0;}
+  .slide.dark p{color:rgba(255,255,255,.78);}
+  .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.85rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--blue);margin-bottom:18px;}
+  .eyebrow::before{content:"";width:32px;height:3px;background:var(--blue);}
+  .logo-fel{font-family:'Manrope',sans-serif;font-weight:900;font-size:3.2rem;color:var(--white);letter-spacing:-1px;line-height:1;}
+  .logo-sub{font-weight:700;color:var(--blue);letter-spacing:.25em;font-size:.85rem;margin-top:4px;}
+
+  /* ============== Slide layouts ============== */
+  .cover{justify-content:flex-end;}
+  .cover .glow{
+    position:absolute;top:-20vh;right:-15vw;width:60vw;height:60vw;
+    border-radius:50%;background:radial-gradient(circle,rgba(41,171,226,.5),transparent 60%);
+    filter:blur(40px);pointer-events:none;
+  }
+  .cover .dots{
+    position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.10) 1px,transparent 1.4px);background-size:22px 22px;mask-image:radial-gradient(ellipse 80% 60% at 70% 40%,#000 30%,transparent 78%);opacity:.5;pointer-events:none;
+  }
+  .cover .logo-block{position:absolute;top:5vh;left:7vw;z-index:2;}
+  .cover .meta{margin-top:auto;color:var(--blue-light);font-size:.95rem;font-weight:600;letter-spacing:.05em;position:relative;z-index:2;}
+  .cover h1{position:relative;z-index:2;}
+  .cover h1 .accent{color:var(--blue-light);}
+  .cover .sub{font-size:1.3rem;color:var(--grey-300);max-width:800px;margin-top:24px;position:relative;z-index:2;}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;height:100%;}
+  .pills{display:flex;gap:24px;margin-top:50px;}
+  .pill{flex:1;background:var(--grey-100);border-radius:16px;padding:30px 24px;text-align:center;}
+  .pill strong{display:block;font-family:'Manrope',sans-serif;font-weight:800;font-size:2.5rem;color:var(--blue);line-height:1;margin-bottom:10px;}
+  .pill span{font-size:.95rem;font-weight:600;color:var(--navy-800);}
+
+  .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-top:40px;}
+  .sw{aspect-ratio:1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;color:var(--white);}
+  .sw.l{color:var(--navy-800);}
+  .sw .name{font-weight:700;font-size:.95rem;}
+  .sw .hex{font-size:.8rem;opacity:.85;margin-top:2px;}
+
+  .svc-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;margin-top:40px;}
+  .svc{background:var(--white);border-radius:18px;padding:30px;border:1px solid #e5ecf3;box-shadow:0 4px 20px rgba(7,24,43,.04);}
+  .svc::before{content:"";display:block;width:50px;height:4px;background:var(--blue);border-radius:2px;margin-bottom:18px;}
+  .svc h3{margin-bottom:10px;}
+  .svc p{font-size:1rem;}
+
+  .grid8{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:36px;}
+  .gridcell{background:var(--grey-100);border-radius:14px;padding:24px;display:flex;flex-direction:column;justify-content:center;min-height:120px;}
+  .gridcell::before{content:"";display:block;width:18px;height:18px;border-radius:50%;background:var(--blue);margin-bottom:14px;}
+  .gridcell span{font-weight:700;color:var(--navy-800);font-size:1.05rem;}
+
+  .network-grid{display:grid;grid-template-columns:2fr 1fr;gap:30px;height:75%;margin-top:30px;}
+  .map-area{background:var(--navy-700);border:1px solid var(--blue);border-radius:18px;position:relative;overflow:hidden;}
+  .map-area svg{width:100%;height:100%;}
+  .map-stats{display:flex;flex-direction:column;gap:14px;}
+  .map-stat{background:var(--navy-700);border:1px solid var(--blue);border-radius:14px;padding:18px 22px;}
+  .map-stat strong{display:block;font-family:'Manrope',sans-serif;font-size:2rem;color:var(--blue);line-height:1;}
+  .map-stat span{display:block;color:rgba(255,255,255,.7);margin-top:6px;font-size:.9rem;}
+
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:50px;}
+  .step{text-align:center;}
+  .step .circ{width:90px;height:90px;border-radius:50%;background:var(--blue);color:var(--white);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:2rem;margin:0 auto 20px;box-shadow:0 12px 28px -10px rgba(41,171,226,.6);}
+  .step h3{margin-bottom:8px;}
+
+  .ind-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px;}
+  .ind{background:var(--white);border:1px solid #e5ecf3;border-radius:16px;padding:30px;position:relative;overflow:hidden;}
+  .ind::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--blue);}
+  .ind span{font-weight:700;color:var(--navy-800);font-size:1.2rem;display:block;margin-left:10px;}
+
+  .testi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px;}
+  .testi{background:var(--grey-100);border-radius:18px;padding:30px;}
+  .testi .stars{color:#f5b301;letter-spacing:2px;font-size:1.1rem;margin-bottom:14px;}
+  .testi blockquote{margin:0 0 22px;padding:0;font-size:1rem;color:var(--navy-800);line-height:1.7;}
+  .testi .who{border-top:1px solid var(--grey-300);padding-top:14px;}
+  .testi .who strong{display:block;color:var(--navy-800);}
+  .testi .who span{display:block;color:var(--blue);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+
+  .contact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:30px;margin-top:50px;}
+  .cinfo{background:var(--navy-700);border-left:4px solid var(--blue);padding:24px;border-radius:0 14px 14px 0;}
+  .cinfo .lbl{color:var(--blue);font-size:.78rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;}
+  .cinfo .val{color:var(--white);font-size:1.1rem;margin-top:8px;line-height:1.5;}
+
+  /* ============== Controls ============== */
+  .controls{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;
+    display:flex;gap:8px;align-items:center;
+    background:rgba(7,24,43,.78);backdrop-filter:blur(10px);
+    padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1);
+  }
+  .controls button{
+    background:none;border:0;color:var(--white);width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .2s;
+  }
+  .controls button:hover{background:rgba(255,255,255,.1);}
+  .controls .count{color:var(--white);font-size:.85rem;font-weight:600;padding:0 10px;min-width:54px;text-align:center;}
+  .controls .count b{color:var(--blue);}
+  .controls .fs{margin-left:6px;border-left:1px solid rgba(255,255,255,.15);padding-left:10px;}
+
+  .footer-bar{
+    position:absolute;bottom:24px;left:7vw;right:7vw;
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:.78rem;color:var(--grey-500);font-weight:500;
+  }
+  .slide.dark .footer-bar{color:rgba(255,255,255,.45);}
+  .footer-bar .brand{color:var(--blue);font-weight:700;letter-spacing:.1em;}
+
+  /* Print mode: all slides stacked */
+  @media print {
+    html,body{overflow:visible;height:auto;background:#fff;}
+    .deck{height:auto;}
+    .slide{position:relative;opacity:1;pointer-events:auto;transform:none;width:100%;height:100vh;page-break-after:always;}
+    .controls{display:none;}
+  }
+
+  @media (max-width:900px){
+    .twocol,.svc-row,.network-grid,.steps,.ind-grid,.testi-row,.contact-grid,.palette,.grid8,.pills{
+      grid-template-columns:1fr !important;
+      gap:18px !important;
+    }
+    .slide{padding:4vh 6vw;overflow-y:auto;}
+    h1{font-size:2.2rem;} h2{font-size:1.6rem;}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ============== SLIDE 1: COVER ============== -->
+<section class="slide dark cover active">
+  <div class="glow"></div>
+  <div class="dots"></div>
+  <div class="logo-block">
+    <div class="logo-fel">FEL</div>
+    <div class="logo-sub">INTERNATIONAL  SHIPPING</div>
+  </div>
+  <h1>Modern Logistics,<br/><span class="accent">Worldwide.</span></h1>
+  <p class="sub">Air · Sea · Land · Door-to-Door · Customs Clearance — across UAE, India and the GCC.</p>
+  <div class="meta" style="margin-top:30px;">FEL International Shipping  ·  Pitch Deck  ·  2026</div>
+</section>
+
+<!-- ============== SLIDE 2: WHO WE ARE ============== -->
+<section class="slide light">
+  <div class="eyebrow">About FEL</div>
+  <h2>Logistics that simplify global trade.</h2>
+  <div class="twocol" style="margin-top:30px;align-items:flex-start;">
+    <p style="font-size:1.2rem;">FEL International Shipping handles both the intricate logistics and freight forwarding requirements of major projects as well as smaller establishments. From single shipments to enterprise supply-chain programmes, we are the partner that turns global trade into a predictable, well-priced, on-time operation.</p>
+    <div class="pills" style="flex-direction:column;margin-top:0;">
+      <div class="pill"><strong>15+</strong><span>Years in Logistics</span></div>
+      <div class="pill"><strong>120+</strong><span>Countries Served</span></div>
+      <div class="pill"><strong>24/7</strong><span>Operations Support</span></div>
+    </div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 3: BRAND ============== -->
+<section class="slide light">
+  <div class="eyebrow">Brand System</div>
+  <h2>Built on trust. Designed for clarity.</h2>
+  <div class="palette">
+    <div class="sw" style="background:#07182B"><span class="name">Navy 900</span><span class="hex">#07182B</span></div>
+    <div class="sw" style="background:#0D2535"><span class="name">Navy 800</span><span class="hex">#0D2535</span></div>
+    <div class="sw" style="background:#29ABE2"><span class="name">Sky Blue</span><span class="hex">#29ABE2</span></div>
+    <div class="sw l" style="background:#7ED4F5"><span class="name">Sky Light</span><span class="hex">#7ED4F5</span></div>
+    <div class="sw l" style="background:#F0F4F8;border:1px solid #e5ecf3"><span class="name">Grey 100</span><span class="hex">#F0F4F8</span></div>
+  </div>
+  <div style="margin-top:50px;">
+    <h3 style="color:var(--blue);font-size:1.1rem;letter-spacing:.05em;">TYPOGRAPHY</h3>
+    <p style="font-size:1.15rem;margin-top:10px;">Manrope (display) + Inter (body) · Pill-shaped CTAs · Dotted-world-map iconography</p>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 4: SERVICES FEATURED ============== -->
+<section class="slide alt">
+  <div class="eyebrow">Our Services</div>
+  <h2>Multi-modal freight, end-to-end.</h2>
+  <div class="svc-row">
+    <div class="svc">
+      <h3>Air Freight</h3>
+      <p>Scheduled &amp; charter flights; time-critical lanes; priority customs.</p>
+    </div>
+    <div class="svc">
+      <h3>Sea Freight</h3>
+      <p>FCL · LCL · break-bulk; consolidated GCC and global ocean lanes.</p>
+    </div>
+    <div class="svc">
+      <h3>Land Freight</h3>
+      <p>FTL · LTL · reefer; GPS-tracked fleets across the GCC corridor.</p>
+    </div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 5: SERVICES GRID ============== -->
+<section class="slide light">
+  <div class="eyebrow">Service Lines</div>
+  <h2>Beyond the headline modes.</h2>
+  <div class="grid8">
+    <div class="gridcell"><span>Door-to-Door</span></div>
+    <div class="gridcell"><span>Customs Clearance</span></div>
+    <div class="gridcell"><span>Warehousing &amp; 3PL</span></div>
+    <div class="gridcell"><span>Commercial Cargo</span></div>
+    <div class="gridcell"><span>Personal Effects</span></div>
+    <div class="gridcell"><span>Express Delivery</span></div>
+    <div class="gridcell"><span>Import / Export</span></div>
+    <div class="gridcell"><span>GCC Freight</span></div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 6: NETWORK ============== -->
+<section class="slide dark">
+  <div class="eyebrow" style="color:var(--blue-light);">Global Network</div>
+  <h2 style="color:var(--white);">Two hubs. 120+ countries.</h2>
+  <div class="network-grid">
+    <div class="map-area">
+      <svg viewBox="0 0 800 460" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#7c8a99" opacity=".6">
+          <circle cx="120" cy="120" r="3"/><circle cx="140" cy="115" r="3"/><circle cx="160" cy="115" r="3"/><circle cx="180" cy="120" r="3"/><circle cx="150" cy="135" r="3"/><circle cx="170" cy="135" r="3"/><circle cx="190" cy="140" r="3"/><circle cx="130" cy="150" r="3"/><circle cx="150" cy="150" r="3"/><circle cx="170" cy="150" r="3"/><circle cx="190" cy="160" r="3"/>
+          <circle cx="235" cy="250" r="3"/><circle cx="245" cy="270" r="3"/><circle cx="255" cy="290" r="3"/><circle cx="265" cy="310" r="3"/><circle cx="250" cy="330" r="3"/>
+          <circle cx="370" cy="120" r="3"/><circle cx="390" cy="115" r="3"/><circle cx="410" cy="120" r="3"/><circle cx="430" cy="125" r="3"/><circle cx="400" cy="135" r="3"/>
+          <circle cx="400" cy="200" r="3"/><circle cx="420" cy="220" r="3"/><circle cx="410" cy="240" r="3"/><circle cx="430" cy="260" r="3"/><circle cx="420" cy="280" r="3"/><circle cx="410" cy="320" r="3"/>
+          <circle cx="510" cy="150" r="3"/><circle cx="540" cy="140" r="3"/><circle cx="570" cy="130" r="3"/><circle cx="590" cy="150" r="3"/><circle cx="610" cy="160" r="3"/><circle cx="640" cy="170" r="3"/><circle cx="600" cy="180" r="3"/><circle cx="630" cy="190" r="3"/>
+          <circle cx="660" cy="320" r="3"/><circle cx="680" cy="330" r="3"/><circle cx="700" cy="340" r="3"/>
+        </g>
+        <!-- Hubs -->
+        <circle cx="530" cy="200" r="8" fill="#29abe2"/>
+        <circle cx="530" cy="200" r="14" fill="none" stroke="#29abe2" stroke-width="2" opacity=".6">
+          <animate attributeName="r" from="8" to="24" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" from=".7" to="0" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <text x="540" y="195" font-family="Inter" font-size="12" font-weight="700" fill="#fff">Dubai · UAE</text>
+        <circle cx="575" cy="220" r="8" fill="#29abe2"/>
+        <circle cx="575" cy="220" r="14" fill="none" stroke="#29abe2" stroke-width="2" opacity=".6">
+          <animate attributeName="r" from="8" to="24" dur="2.3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" from=".7" to="0" dur="2.3s" repeatCount="indefinite"/>
+        </circle>
+        <text x="585" y="232" font-family="Inter" font-size="12" font-weight="700" fill="#fff">Cochin · India</text>
+        <g stroke="#29abe2" stroke-width="1.5" fill="none" opacity=".7" stroke-dasharray="4 6">
+          <path d="M530 200 Q 350 80 160 130"/>
+          <path d="M530 200 Q 350 250 250 290"/>
+          <path d="M530 200 Q 480 130 410 130"/>
+          <path d="M575 220 Q 620 190 660 165"/>
+          <path d="M575 220 Q 620 290 700 340"/>
+        </g>
+      </svg>
+    </div>
+    <div class="map-stats">
+      <div class="map-stat"><strong>15k+</strong><span>Shipments</span></div>
+      <div class="map-stat"><strong>120+</strong><span>Countries</span></div>
+      <div class="map-stat"><strong>850+</strong><span>Clients</span></div>
+      <div class="map-stat"><strong>99%</strong><span>On-time</span></div>
+    </div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 7: PROCESS ============== -->
+<section class="slide light">
+  <div class="eyebrow">How We Work</div>
+  <h2>A simple, predictable process.</h2>
+  <div class="steps">
+    <div class="step"><div class="circ">01</div><h3>Quote</h3><p>Tell us origin, destination, cargo. Transparent quote within 2 hours.</p></div>
+    <div class="step"><div class="circ">02</div><h3>Pickup</h3><p>We collect, label, and prepare cargo at origin with full documentation.</p></div>
+    <div class="step"><div class="circ">03</div><h3>Transit</h3><p>Live tracking, customs clearance, and proactive updates at every milestone.</p></div>
+    <div class="step"><div class="circ">04</div><h3>Delivery</h3><p>Door-to-door handover with signed proof of delivery and a satisfaction check.</p></div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 8: INDUSTRIES ============== -->
+<section class="slide alt">
+  <div class="eyebrow">Industries Served</div>
+  <h2>Tailored freight for every sector.</h2>
+  <div class="ind-grid">
+    <div class="ind"><span>Retail &amp; FMCG</span></div>
+    <div class="ind"><span>Pharma &amp; Healthcare</span></div>
+    <div class="ind"><span>Automotive</span></div>
+    <div class="ind"><span>Oil &amp; Gas</span></div>
+    <div class="ind"><span>Technology</span></div>
+    <div class="ind"><span>Construction</span></div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 9: TESTIMONIALS ============== -->
+<section class="slide light">
+  <div class="eyebrow">Client Testimonial</div>
+  <h2>What our customers say.</h2>
+  <div class="testi-row">
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <blockquote>"FEL handled our pharma cold-chain from Cochin to Dubai with zero excursions. Customs paperwork was ready before the plane landed."</blockquote>
+      <div class="who"><strong>Anita Rao</strong><span>MedFlow Logistics</span></div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Two years across LCL, FCL, and air. Pricing is honest, updates are constant. The GCC corridor is their bread and butter."</blockquote>
+      <div class="who"><strong>Mohammed Khalid</strong><span>Gulf Retail Group</span></div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Personal relocation Kerala → Sharjah. They packed, shipped, cleared customs, and delivered. The calmest move I've had."</blockquote>
+      <div class="who"><strong>Sandeep Pillai</strong><span>Independent Client</span></div>
+    </div>
+  </div>
+  <div class="footer-bar"><span><span class="brand">FEL</span>  ·  www.felinternational.com</span><span>2026</span></div>
+</section>
+
+<!-- ============== SLIDE 10: CONTACT ============== -->
+<section class="slide dark cover">
+  <div class="glow"></div>
+  <div class="dots"></div>
+  <div class="logo-block">
+    <div class="logo-fel">FEL</div>
+    <div class="logo-sub">INTERNATIONAL  SHIPPING</div>
+  </div>
+  <div style="margin-top:auto;position:relative;z-index:2;">
+    <h1>Let's ship something<br/><span style="color:var(--blue-light)">together.</span></h1>
+    <p class="sub">Send us your shipment details — quote within 2 business hours.</p>
+    <div class="contact-grid">
+      <div class="cinfo"><div class="lbl">Address</div><div class="val">Building no 55/1917, Ground floor, KP Vallon Road, Kadavanthra, Cochin 682020, Kerala</div></div>
+      <div class="cinfo"><div class="lbl">Email</div><div class="val">accounts@felinternational.com</div></div>
+      <div class="cinfo"><div class="lbl">Phone</div><div class="val">+91 954 421 2353</div></div>
+      <div class="cinfo"><div class="lbl">Web</div><div class="val">www.felinternational.com</div></div>
+    </div>
+    <div class="meta" style="margin-top:30px;">FEL International Shipping  ·  Made with care.</div>
+  </div>
+</section>
+
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <button onclick="go(-1)" aria-label="Previous slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="count"><b id="cur">1</b> / <span id="total">10</span></span>
+  <button onclick="go(1)" aria-label="Next slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <button class="fs" onclick="toggleFs()" aria-label="Fullscreen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 7V3h4M21 7V3h-4M3 17v4h4M21 17v4h-4"/></svg>
+  </button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  document.getElementById('total').textContent = total;
+  let idx = 0;
+  function show(i) {
+    idx = (i + total) % total;
+    slides.forEach((s, n) => s.classList.toggle('active', n === idx));
+    document.getElementById('cur').textContent = idx + 1;
+  }
+  function go(delta) { show(idx + delta); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(total - 1);
+  });
+  function toggleFs() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+  // Click halves: left half = previous, right half = next
+  document.querySelector('.deck').addEventListener('click', e => {
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    const x = e.clientX, w = window.innerWidth;
+    if (x < w * 0.3) go(-1);
+    else if (x > w * 0.7) go(1);
+  });
+</script>
+
+</body>
+</html>

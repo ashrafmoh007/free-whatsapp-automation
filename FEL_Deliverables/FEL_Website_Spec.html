@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FEL International Shipping — Website Specification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy-900:#07182B; --navy-800:#0D2535; --blue:#29ABE2; --blue-light:#7ED4F5;
+    --grey-100:#F0F4F8; --grey-500:#7c8a99; --grey-700:#4A4A4A; --white:#fff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:'Inter',sans-serif;color:var(--grey-700);
+    background:#fafbfc;line-height:1.65;
+  }
+  .page{
+    max-width:880px;margin:0 auto;background:#fff;
+    box-shadow:0 4px 30px rgba(7,24,43,.06);
+    min-height:100vh;padding:80px 70px;
+  }
+  h1,h2,h3,h4{font-family:'Manrope',sans-serif;color:var(--navy-800);font-weight:800;line-height:1.2;letter-spacing:-.01em;}
+  h1{font-size:2.4rem;margin:0;}
+  h2{font-size:1.7rem;margin:50px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--blue);}
+  h3{font-size:1.25rem;margin:28px 0 10px;color:var(--navy-800);}
+  h4{font-size:1rem;margin:18px 0 8px;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;}
+  p{margin:0 0 14px;}
+  ul{margin:8px 0 18px;padding-left:22px;}
+  li{margin-bottom:6px;}
+  .cover{
+    text-align:center;padding:60px 0 50px;border-bottom:1px solid #e5ecf3;
+    margin-bottom:30px;
+  }
+  .logo-fel{font-family:'Manrope',sans-serif;font-weight:900;font-size:5rem;color:var(--grey-700);letter-spacing:-2px;line-height:1;}
+  .logo-sub{font-weight:700;color:var(--blue);letter-spacing:.25em;font-size:1rem;margin-top:6px;}
+  .doctitle{margin-top:30px;font-size:1.6rem;}
+  .docsub{color:var(--grey-500);font-style:italic;margin-top:6px;}
+  .meta{margin-top:30px;color:var(--navy-800);font-weight:600;}
+  table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:.95rem;}
+  th{background:var(--navy-800);color:var(--white);text-align:left;padding:10px 14px;font-weight:600;}
+  td{padding:10px 14px;border-bottom:1px solid #e5ecf3;}
+  tr:nth-child(even) td{background:#f7fafc;}
+  .swatch{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:middle;margin-right:8px;border:1px solid rgba(0,0,0,.06);}
+  .bullet-prefix{font-weight:700;color:var(--navy-800);}
+  .divider{height:3px;background:linear-gradient(90deg,var(--blue),transparent);margin:30px 0;border-radius:3px;}
+  .callout{background:var(--grey-100);border-left:4px solid var(--blue);padding:16px 20px;margin:16px 0;border-radius:0 8px 8px 0;}
+  .badge{display:inline-block;background:var(--blue);color:#fff;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700;letter-spacing:.1em;}
+  @media print {
+    body{background:#fff;}
+    .page{box-shadow:none;padding:30px 20px;max-width:none;}
+    h2{break-before:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- Cover -->
+<div class="cover">
+  <div class="logo-fel">FEL</div>
+  <div class="logo-sub">INTERNATIONAL  SHIPPING</div>
+  <div class="doctitle">Website Specification &amp; Content Document</div>
+  <div class="docsub">Brand system · Content matrix · Section-by-section build notes</div>
+  <div class="meta">Prepared for: FEL International Shipping<br/><span style="font-weight:400;color:var(--grey-500);font-style:italic;">Version 1.0 · 2026</span></div>
+</div>
+
+<!-- 1. Overview -->
+<h2>1. Overview</h2>
+<p>FEL International Shipping is a logistics and freight-forwarding partner operating between India, the UAE, the wider GCC, and the rest of the world. The new website is built to mirror the existing brand language (deep navy, sky-blue accent, dotted-world-map iconography) while modernising the page architecture, visual hierarchy, and conversion paths.</p>
+<p>This document is the single source of truth for the website build — covering brand system, every section's content, technical decisions, and rollout notes.</p>
+
+<h3>Goals</h3>
+<ul>
+  <li><span class="bullet-prefix">Position:</span> Position FEL as a modern, trustworthy, multi-modal freight specialist.</li>
+  <li><span class="bullet-prefix">Convert:</span> Drive quote requests via prominent contact and floating WhatsApp CTAs.</li>
+  <li><span class="bullet-prefix">Showcase:</span> Showcase service breadth (Air / Sea / Land / Customs / Warehousing / Personal).</li>
+  <li><span class="bullet-prefix">Reach:</span> Demonstrate network reach with an animated hub-and-lane world map.</li>
+  <li><span class="bullet-prefix">Trust:</span> Establish credibility through counters, testimonials, and a clear process.</li>
+</ul>
+<div class="divider"></div>
+
+<!-- 2. Brand System -->
+<h2>2. Brand System</h2>
+<h3>2.1 Colour Palette</h3>
+<table>
+  <tr><th>Token</th><th>Hex</th><th>Usage</th></tr>
+  <tr><td><span class="swatch" style="background:#07182B"></span>Navy 900 (deepest)</td><td>#07182B</td><td>Hero base, footer</td></tr>
+  <tr><td><span class="swatch" style="background:#0D2535"></span>Navy 800 (primary dark)</td><td>#0D2535</td><td>Dark sections, body text</td></tr>
+  <tr><td><span class="swatch" style="background:#29ABE2"></span>Sky Blue 500 (accent)</td><td>#29ABE2</td><td>CTAs, links, highlights</td></tr>
+  <tr><td><span class="swatch" style="background:#7ED4F5"></span>Sky Blue 300</td><td>#7ED4F5</td><td>Hover states, lighter accents</td></tr>
+  <tr><td><span class="swatch" style="background:#F0F4F8"></span>Grey 100 (alt bg)</td><td>#F0F4F8</td><td>Alternating section bg</td></tr>
+  <tr><td><span class="swatch" style="background:#4A4A4A"></span>Grey 700 (body)</td><td>#4A4A4A</td><td>Body copy, secondary text</td></tr>
+  <tr><td><span class="swatch" style="background:#FFFFFF;border:1px solid #e5ecf3"></span>White</td><td>#FFFFFF</td><td>Cards, primary background</td></tr>
+</table>
+
+<h3>2.2 Typography</h3>
+<ul>
+  <li><span class="bullet-prefix">Display:</span> Manrope (700 / 800) — headings, large display text, statistics.</li>
+  <li><span class="bullet-prefix">Body:</span> Inter (300 / 400 / 500 / 600 / 700) — body, navigation, UI labels.</li>
+  <li><span class="bullet-prefix">Tracking:</span> Letter-spacing of 0.14–0.22em on uppercase eyebrows and labels.</li>
+</ul>
+
+<h3>2.3 Logo</h3>
+<p>The FEL logo is recreated as inline SVG inside the site. This keeps the wordmark crisp at any size, allows colour switching for dark/light backgrounds via a CSS custom property, and avoids raster assets entirely.</p>
+<ul>
+  <li>Charcoal grey "FEL" wordmark (white on dark backgrounds).</li>
+  <li>Blue swoosh arrow passing through the "L" — signature element.</li>
+  <li>"INTERNATIONAL SHIPPING" wordmark in tracked-out sky-blue caps.</li>
+  <li>Three diagonal speed lines (2 grey, 1 blue) beneath the wordmark.</li>
+</ul>
+
+<h3>2.4 Visual Motifs</h3>
+<ul>
+  <li><span class="bullet-prefix">Hero:</span> Dotted world map overlay in the hero (radial-mask, 22px grid).</li>
+  <li><span class="bullet-prefix">Eyebrows:</span> Short dash + uppercase + small plane (✈) icon.</li>
+  <li><span class="bullet-prefix">Headings:</span> Two-line H2 with the second line highlighted in sky-blue + underline.</li>
+  <li><span class="bullet-prefix">Buttons:</span> Pill-shaped CTAs with arrow → that slides on hover.</li>
+  <li><span class="bullet-prefix">Cards:</span> Glassmorphic country cards in the hero, animated swoosh hubs on the map.</li>
+</ul>
+<div class="divider"></div>
+
+<!-- 3. Site Architecture -->
+<h2>3. Site Architecture</h2>
+<p>Single-page architecture with anchor-link navigation — keeps the experience fast and scrollable on mobile while letting search engines index every section.</p>
+<table>
+  <tr><th>Section</th><th>Contents</th></tr>
+  <tr><td><b>Navbar</b></td><td>Fixed; transparent → blurred-navy on scroll; logo, links, phone, hamburger.</td></tr>
+  <tr><td><b>Hero</b></td><td>H1, sub-copy, dual CTAs, hero-stats strip, two glassmorphic country cards (UAE/India/GCC).</td></tr>
+  <tr><td><b>Feature Strip</b></td><td>"Worldwide Service" · "24/7 Online Support" · "Make a Phone Call" CTA card.</td></tr>
+  <tr><td><b>About</b></td><td>Our Company eyebrow, 2-line H2, paragraph, 6-item feature list, About Us CTA, rating badge.</td></tr>
+  <tr><td><b>Counters</b></td><td>Dark photo-overlay band: 15,000+ shipments · 120+ countries · 850+ clients · 99% on-time.</td></tr>
+  <tr><td><b>Services — Featured</b></td><td>Three image-cards: Air Freight, Sea Freight, Land Freight.</td></tr>
+  <tr><td><b>Services — Grid</b></td><td>Door-to-Door, Customs, Warehousing, Commercial, Personal, Express, Import/Export, GCC.</td></tr>
+  <tr><td><b>Industries</b></td><td>Retail · Pharma · Automotive · Oil &amp; Gas · Technology · Construction.</td></tr>
+  <tr><td><b>Process</b></td><td>4-step timeline: Quote → Pickup → Transit → Delivery.</td></tr>
+  <tr><td><b>Network Map</b></td><td>Animated SVG world map; Cochin + Dubai hubs; pulsing nodes; dashed lanes.</td></tr>
+  <tr><td><b>Testimonials</b></td><td>Three customer cards with star rating, role, and quote.</td></tr>
+  <tr><td><b>Contact</b></td><td>Address/email/phone block + full enquiry form.</td></tr>
+  <tr><td><b>Footer</b></td><td>Logo, tagline, socials, Quick Links, Get In Touch, Subscribe form, copyright + Weblanza credit.</td></tr>
+  <tr><td><b>Floating</b></td><td>WhatsApp pulse button + Back-to-Top button.</td></tr>
+</table>
+<div class="divider"></div>
+
+<!-- 4. Section Content -->
+<h2>4. Section-by-Section Content</h2>
+
+<h3>4.1 Hero</h3>
+<div class="callout">
+<b>Eyebrow:</b> Modern Logistic Transport<br/>
+<b>Headline:</b> Move Cargo Anywhere. / <i>Worldwide. On Time.</i> (line 2 in blue + underline)<br/>
+<b>Body:</b> FEL International Shipping connects UAE, India, and the GCC with the rest of the world — Air, Sea, Land, Door-to-Door and Customs Clearance, handled by specialists who treat your freight like their own.<br/>
+<b>CTAs:</b> Explore Services → (primary)  ·  Get a Quote (ghost)<br/>
+<b>Stats:</b> 15+ Years · 120+ Countries · 24/7 Operations Support<br/>
+<b>Cards:</b> UAE · India · GCC + Worldwide (glassmorphic)
+</div>
+
+<h3>4.2 About</h3>
+<div class="callout">
+<b>Eyebrow:</b> Our Company<br/>
+<b>Headline:</b> Our Expertise Stands in / <i>Logistics Solutions</i><br/>
+<b>Body:</b> We deal with both the intricate logistics and freight forwarding requirements of major projects as well as smaller establishments. From single shipments to enterprise supply-chain programmes — FEL is the partner that simplifies global trade.<br/>
+<b>Feature list:</b> Multi-modal Freight · Customs Brokerage · Door-to-Door · Warehousing &amp; 3PL · Personal Effects · GCC Express<br/>
+<b>Badge:</b> 4.8/5 · 15k Reviews · Customer Satisfied<br/>
+<b>CTA:</b> About Us →
+</div>
+
+<h3>4.3 Services</h3>
+<div class="callout">
+<b>Eyebrow:</b> Our Services<br/>
+<b>Headline:</b> Efficient Logistics Solutions for Your / <i>Business</i><br/>
+<b>Body:</b> Hybrid layout — three large image cards for the flagship modes, followed by an 8-tile grid covering the remaining service lines.<br/>
+<b>Featured:</b> Air Freight · Sea Freight · Land Freight<br/>
+<b>Grid:</b> Door-to-Door · Customs Clearance · Warehousing · Commercial Cargo · Personal Effects · Express Delivery · Import/Export · GCC Freight
+</div>
+
+<h3>4.4 Industries</h3>
+<div class="callout">
+<b>Eyebrow:</b> Industries We Serve<br/>
+<b>Headline:</b> Tailored Freight for Every / <i>Sector</i><br/>
+<b>Industries:</b> Retail &amp; FMCG · Pharma &amp; Healthcare · Automotive · Oil &amp; Gas · Technology · Construction
+</div>
+
+<h3>4.5 Process</h3>
+<div class="callout">
+<b>Eyebrow:</b> How We Work<br/>
+<b>Headline:</b> A Simple, Predictable / <i>Process</i><br/>
+<b>01 Quote:</b> Tell us origin, destination, and cargo — quote within 2 hours.<br/>
+<b>02 Pickup:</b> We collect, label, and prepare your cargo at origin with full documentation.<br/>
+<b>03 Transit:</b> Live tracking, customs clearance, proactive updates at every milestone.<br/>
+<b>04 Delivery:</b> Door-to-door handover with signed proof of delivery.
+</div>
+
+<h3>4.6 Network Map</h3>
+<div class="callout">
+<b>Eyebrow:</b> Global Network<br/>
+<b>Headline:</b> Our Hubs &amp; Lanes Across the / <i>World</i><br/>
+<b>Body:</b> Pure SVG world map (dotted continents) with animated pulsing hub markers at Cochin and Dubai. Dashed sky-blue lanes radiate to North America, Europe, Africa, East Asia, and Australia.<br/>
+<b>Legend:</b> FEL Hub (blue) · Connected Country (navy)
+</div>
+
+<h3>4.7 Testimonials</h3>
+<div class="callout">
+<b>Eyebrow:</b> Client Testimonial<br/>
+<b>Headline:</b> What Our Customers Say / <i>About Us</i><br/>
+<b>Quote 1:</b> Anita Rao — MedFlow Logistics — pharma cold-chain praise.<br/>
+<b>Quote 2:</b> Mohammed Khalid — Gulf Retail Group — GCC corridor reliability.<br/>
+<b>Quote 3:</b> Sandeep Pillai — Independent Client — personal relocation.
+</div>
+
+<h3>4.8 Contact</h3>
+<div class="callout">
+<b>Eyebrow:</b> Get In Touch<br/>
+<b>Headline:</b> Ship Smarter With / <i>FEL Today</i><br/>
+<b>Address:</b> Building no 55/1917, Ground floor, KP Vallon Road, Kadavanthra, Cochin 682020, Kerala<br/>
+<b>Email:</b> accounts@felinternational.com<br/>
+<b>Phone:</b> +91 954 421 2353<br/>
+<b>Form fields:</b> Name · Email · Phone · Service (dropdown) · Message · Send Enquiry CTA
+</div>
+
+<h3>4.9 Footer</h3>
+<div class="callout">
+<b>Columns:</b> Brand block · Quick Links · Get In Touch · Subscribe Us<br/>
+<b>Tagline:</b> We aim to deal with both the intricate logistics and freight forwarding requirements of major projects as well as smaller establishments.<br/>
+<b>Bottom row:</b> © Copyright 2026 FEL International Shipping. All Rights Reserved.  ·  Made with ♥ by Weblanza
+</div>
+<div class="divider"></div>
+
+<!-- 5. Tech -->
+<h2>5. Technical Notes</h2>
+<ul>
+  <li><span class="bullet-prefix">Stack:</span> Single static <code>index.html</code> — embedded CSS and vanilla JS, zero dependencies.</li>
+  <li><span class="bullet-prefix">CSS:</span> Custom properties for the entire brand palette (easy theming).</li>
+  <li><span class="bullet-prefix">JS:</span> IntersectionObserver-driven reveal animations and counter ramp-ups.</li>
+  <li><span class="bullet-prefix">Layout:</span> Mobile-first responsive grid; mobile hamburger drawer; smooth-scroll anchors.</li>
+  <li><span class="bullet-prefix">Icons:</span> Inline SVG (Feather-style) — no icon-font dependency.</li>
+  <li><span class="bullet-prefix">Fonts:</span> Inter + Manrope via Google Fonts with preconnect.</li>
+  <li><span class="bullet-prefix">Images:</span> Unsplash placeholders — swap with branded photography in v1.1.</li>
+  <li><span class="bullet-prefix">Forms:</span> Demo handler on the contact form; wire to your CRM / Mailgun / Zoho before launch.</li>
+  <li><span class="bullet-prefix">A11y:</span> Semantic landmarks, aria-labels on icons, visible focus rings, 4.5:1 contrast.</li>
+</ul>
+
+<h3>Performance targets</h3>
+<ul>
+  <li><span class="bullet-prefix">LCP:</span> &lt; 2.5s on 4G mobile (hero is gradient/dots — no external image).</li>
+  <li><span class="bullet-prefix">CSS size:</span> &lt; 30KB gzipped.</li>
+  <li><span class="bullet-prefix">JS:</span> No render-blocking JS — scripts at end of body.</li>
+</ul>
+<div class="divider"></div>
+
+<!-- 6. Rollout -->
+<h2>6. Rollout Checklist</h2>
+<ul>
+  <li>Replace Unsplash imagery with FEL's own photography.</li>
+  <li>Connect the enquiry form to a real endpoint (Mailgun, SendGrid, Zoho).</li>
+  <li>Update the WhatsApp number link if it changes.</li>
+  <li>Add real Google Maps embed under the Contact section if desired.</li>
+  <li>Add favicon set (16/32/180px).</li>
+  <li>Set up basic SEO meta (OG image, Twitter card, robots.txt, sitemap.xml).</li>
+  <li>Hook social links to actual FEL profiles before launch.</li>
+  <li>Run Lighthouse + WAVE; fix any contrast or alt-text gaps.</li>
+  <li>Final QA on Safari, Chrome, Edge, Firefox + iOS Safari + Android Chrome.</li>
+</ul>
+
+<div class="divider"></div>
+<p style="text-align:center;color:var(--grey-500);font-style:italic;margin-top:40px;">End of document.</p>
+
+</div>
+</body>
+</html>
