@@ -1,1560 +1,878 @@
 /**
  * ================================================================
- *  FALCON GARAGE — JOB UPDATE TRACKER
- *  Google Sheets + Apps Script System
- *  Version 2.0  — Email Alerts + Monthly PDF Summary
+ *  FALCON GARAGE — JOB UPDATE TRACKER  v3.0
+ *  Google Sheets + Apps Script  |  فالكون للسيارات — قطر
  * ================================================================
  *
  *  QUICK SETUP (one-time, ~60 seconds):
  *  ─────────────────────────────────────
  *  1. Open a NEW blank Google Sheet
- *  2. Click  Extensions → Apps Script
- *  3. Delete ALL existing code in the editor
- *  4. Paste THIS entire file
- *  5. Press Ctrl+S  (or Cmd+S on Mac) to save
- *  6. Close the Apps Script tab
- *  7. Refresh your Google Sheet  (F5 / Cmd+R)
- *  8. A new menu  "🔧 Falcon Garage"  appears in the menu bar
- *  9. Click it → "⚙️ Setup Sheet (First Time Only)"
- * 10. When Google asks for permission, click "Allow"
- *     (Email and Drive access are needed for v2 features)
- * 11. Your tracker is live!
+ *  2. Extensions → Apps Script → paste this file → Save
+ *  3. Back in the sheet: Falcon Garage → ⚙ Setup Sheet
+ *  4. Authorise when prompted — done!
  *
- *  DAILY USE:
+ *  HOW TO USE:
  *  ─────────────────────────────────────
- *  • Menu → "📋 New Job Card"  to auto-generate a job card number
- *  • Fill columns C–L + email in Column U
- *  • Column M dropdown → select current status
- *  • Column R → click  "📱 Send Update"  to open WhatsApp
- *  • Menu → 📧 Email Alerts  to send email updates to customers
- *  • Menu → 📄 Monthly PDF Summary  to generate monthly reports
- *  • Each row is a PERMANENT record — never delete rows
+ *  • Add a job row → Status / Priority dropdowns auto-appear
+ *  • Change Status → row colour updates instantly (onEdit)
+ *  • Click 📱 WhatsApp link in column AG to open WA Web
+ *  • Menu → New Job Card → auto-generates next JC-YYYY-NNN ID
+ *  • Menu → Email → send branded HTML alerts
+ *  • Menu → Monthly PDF → export to Google Drive
  *
- *  NEW IN v2.0:
+ *  COLUMNS A–AH  (34 total):
  *  ─────────────────────────────────────
- *  • Column U  — Customer Email address
- *  • Email single customer update (selected row)
- *  • Bulk email all active jobs
- *  • Bulk email Ready-for-Collection alerts
- *  • Monthly PDF job summary (saves to Drive + optional email)
- *
+ *  A  Job ID          B  Date In         C  Time In
+ *  D  Status          E  Priority        F  Job Type        G  Technician
+ *  H  Cust Name       I  Phone           J  Email           K  Cust ID
+ *  L  Plate           M  Make            N  Model           O  Year
+ *  P  VIN             Q  Odometer        R  Veh Type
+ *  S  Complaint       T  Work Done       U  Parts Used
+ *  V  Parts QAR       W  Labour QAR      X  Discount QAR    Y  VAT QAR
+ *  Z  Total QAR       AA Payment Method  AB Pay Status
+ *  AC Est Ref         AD Inv Ref         AE Date Out        AF Approved By
+ *  AG WA Link         AH Alert Sent
  * ================================================================
  */
 
-
-// ================================================================
+// ──────────────────────────────────────────────────────────────
 //  CONFIGURATION
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
 const CFG = {
-  GARAGE_NAME: "Falcon Garage",
-  SHEET_NAME:  "JOB UPDATE TRACKER",
-  HEADER_ROW:  3,
-  DATA_START:  4,
-  MAX_ROWS:    500,
-  JOB_PREFIX:  "FG",
-  TOTAL_COLS:  21,    // A–U  (v2 adds Customer Email in col U)
+  GARAGE_NAME : "Falcon Garage",
+  GARAGE_AR   : "ورشة فالكون",
+  GARAGE_TEL  : "+974 4486 2018 | 7072 5811 | 7003 3723 | 7731 8043",
+  GARAGE_WEB  : "www.falqatar.com",
+  GARAGE_EMAIL: "info@falqatar.com",
+  GARAGE_ADDR : "Street 47, Bldg 190, Zone 57, Industrial Area, Doha - Qatar",
+
+  SHEET_NAME  : "JOB UPDATE TRACKER",
+  TITLE_ROW   : 1,
+  SUB_ROW     : 2,
+  GROUP_ROW   : 3,
+  HEADER_ROW  : 4,
+  DATA_START  : 5,
+  MAX_ROWS    : 500,
+  JOB_PREFIX  : "JC",
+  TOTAL_COLS  : 34,
+  CURRENCY    : "QAR",
+  VAT_RATE    : 0.05,
 };
 
-
-// ================================================================
-//  COLUMN MAP
-// ================================================================
-
+// Column index map (1-based)
 const C = {
-  JOB_CARD:    1,   // A
-  DATE_OPENED: 2,   // B
-  CUST_NAME:   3,   // C
-  MOBILE:      4,   // D
-  VEHICLE:     5,   // E
-  PLATE:       6,   // F
-  VIN:         7,   // G
-  MILEAGE:     8,   // H
-  COMPLAINT:   9,   // I
-  DIAGNOSIS:   10,  // J
-  WORK_DONE:   11,  // K
-  PARTS:       12,  // L
-  STATUS:      13,  // M
-  READY:       14,  // N
-  TECHNICIAN:  15,  // O
-  ADVISOR:     16,  // P
-  UPDATE_DATE: 17,  // Q
-  WHATSAPP:    18,  // R
-  ALERT_SENT:  19,  // S
-  REMARKS:     20,  // T
-  EMAIL:       21,  // U  ← v2
+  JOB_ID    : 1,  DATE_IN   : 2,  TIME_IN   : 3,
+  STATUS    : 4,  PRIORITY  : 5,  JOB_TYPE  : 6,  TECHNICIAN: 7,
+  CUST_NAME : 8,  PHONE     : 9,  EMAIL     : 10, CUST_ID   : 11,
+  PLATE     : 12, MAKE      : 13, MODEL     : 14, YEAR      : 15,
+  VIN       : 16, ODOMETER  : 17, VEH_TYPE  : 18,
+  COMPLAINT : 19, WORK_DONE : 20, PARTS_USED: 21,
+  PARTS_QAR : 22, LABOUR_QAR: 23, DISCOUNT  : 24, VAT_QAR   : 25,
+  TOTAL_QAR : 26, PAYMENT   : 27, PAY_STATUS: 28,
+  EST_REF   : 29, INV_REF   : 30, DATE_OUT  : 31, APPROVED_BY: 32,
+  WA_LINK   : 33, ALERT_SENT: 34,
 };
 
+const STATUS_LIST   = ["🔴 Open","🔵 In Progress","🔧 Body Shop","🔍 QC","🟢 Ready","✅ Delivered","⏸ On Hold"];
+const PRIORITY_LIST = ["🔴 URGENT","🟡 HIGH","🟢 NORMAL","🔵 LOW"];
+const JOB_TYPE_LIST = ["General Service","Oil Change","Body Repair","Electrical","AC Repair","Tyres / Alignment","Inspection","Custom / Other"];
+const VEH_TYPE_LIST = ["Sedan","SUV","Pick-up","Van","Truck","Motorcycle","Other"];
+const PAY_LIST      = ["Cash","Card","Bank Transfer","Credit","Pending"];
+
+// Section group definitions
+const GROUPS = [
+  { label:"🔧  JOB INFORMATION",               s:1,  e:7,  bg:"#1C2839", fg:"#F59E0B" },
+  { label:"👤  CUSTOMER  ·  العميل",            s:8,  e:11, bg:"#0D47A1", fg:"#FFFFFF" },
+  { label:"🚗  VEHICLE  ·  المركبة",            s:12, e:18, bg:"#0891B2", fg:"#FFFFFF" },
+  { label:"🔧  COMPLAINT & WORK  ·  الشكوى",   s:19, e:21, bg:"#7C3AED", fg:"#FFFFFF" },
+  { label:"💰  FINANCIALS  ·  المالية (QAR)",  s:22, e:28, bg:"#065F46", fg:"#F59E0B" },
+  { label:"📋  ADMIN",                          s:29, e:32, bg:"#374151", fg:"#FFFFFF" },
+  { label:"📱  COMMUNICATION",                  s:33, e:34, bg:"#166534", fg:"#FFFFFF" },
+];
+
+// Column header labels (index 0 = col A)
 const HEADERS = [
-  "Job Card No",
-  "Date Opened",
-  "Customer Name",
-  "Mobile Number",
-  "Vehicle Make & Model",
-  "Plate Number",
-  "VIN / Chassis No",
-  "Mileage (KM)",
-  "Customer Complaint",
-  "Diagnosis Details",
-  "Work Done / Repairs Performed",
-  "Parts Changed / Replaced",
-  "Current Status",
-  "Ready for Collection",
-  "Technician Name",
-  "Service Advisor",
-  "Last Update Date",
-  "WhatsApp Update Link",
-  "Customer Alert Sent",
-  "Remarks / Notes",
-  "Customer Email",   // ← v2
+  "Job ID","Date In","Time In",
+  "Status","Priority","Job Type","Technician",
+  "Customer Name","Phone","Email","Customer ID",
+  "Plate No.","Make","Model","Year","VIN","Odometer","Veh Type",
+  "Complaint / Fault","Work Done","Parts Used",
+  "Parts (QAR)","Labour (QAR)","Discount (QAR)","VAT (QAR)","Total (QAR)",
+  "Payment Method","Pay Status",
+  "Estimate Ref","Invoice Ref","Date Out","Approved By",
+  "WhatsApp","Alert Sent",
 ];
 
-const STATUS_LIST = [
-  "Vehicle Received",
-  "Diagnosis Started",
-  "Waiting Customer Approval",
-  "Parts Ordered",
-  "Repair In Progress",
-  "Additional Work Required",
-  "Work Finished",
-  "Ready for Collection",
-  "Delivered",
-];
-
-const YES_NO = ["YES", "NO"];
-
-const P = {
-  TITLE_BG:  "#0D2137",
-  HEADER_BG: "#1A3A5C",
-  BAND_BG:   "#2E86AB",
-  WHITE:     "#FFFFFF",
-  ROW_A:     "#F0F7FF",
-  ROW_B:     "#FFFFFF",
-  BORDER:    "#BDC3C7",
-  ACCENT:    "#1A6FAE",
-  LINK:      "#1D6A39",
-  RED_BG:    "#FADBD8",  RED_FG:  "#7B241C",
-  ORG_BG:    "#FAE5D3",  ORG_FG:  "#784212",
-  BLU_BG:    "#D6EAF8",  BLU_FG:  "#1A5276",
-  GRN_BG:    "#D5F5E3",  GRN_FG:  "#1D6A39",
-  GRY_BG:    "#EAECEE",  GRY_FG:  "#5D6D7E",
+// Status colour map  { keyword → { bg, fg } }
+const STATUS_COLOURS = {
+  "Open"       : { bg:"#FF4444", fg:"#FFFFFF" },
+  "In Progress": { bg:"#1565C0", fg:"#FFFFFF" },
+  "Body Shop"  : { bg:"#5D4037", fg:"#FFFFFF" },
+  "QC"         : { bg:"#6A1B9A", fg:"#FFFFFF" },
+  "Ready"      : { bg:"#2E7D32", fg:"#FFFFFF" },
+  "Delivered"  : { bg:"#004D40", fg:"#CCFFCC" },
+  "On Hold"    : { bg:"#37474F", fg:"#CFD8DC" },
 };
 
 
-// ================================================================
+// ──────────────────────────────────────────────────────────────
 //  MENU
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
 function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-
-  const emailSubMenu = ui.createMenu("📧 Email Alerts")
-    .addItem("📧 Send Email Update (Selected Row)",   "emailCustomerUpdate")
-    .addItem("📧 Email All Active Jobs",              "emailAllActiveJobs")
-    .addItem("📧 Email Ready-for-Collection Alerts",  "emailReadyAlerts");
-
-  ui.createMenu("🔧 Falcon Garage")
-    .addItem("⚙️ Setup Sheet (First Time Only)",      "setupSheet")
+  SpreadsheetApp.getUi()
+    .createMenu("🦅 Falcon Garage")
+    .addItem("⚙ Setup Sheet (first-time)",  "setupSheet")
     .addSeparator()
-    .addItem("📋 New Job Card",                        "createNewJobCard")
-    .addItem("📅 Stamp Update Date on Selected Row",   "stampUpdateDate")
+    .addItem("➕ New Job Card",              "createNewJobCard")
+    .addItem("📱 Open WhatsApp (active row)","openWhatsAppForActiveRow")
     .addSeparator()
-    .addItem("📱 Open WhatsApp for Selected Row",      "openWhatsAppForActiveRow")
+    .addItem("📧 Email Customer (active row)","emailCustomerUpdate")
+    .addItem("📧 Email All Active Jobs",      "emailAllActiveJobs")
+    .addItem("📧 Email Ready-for-Pickup",     "emailReadyAlerts")
     .addSeparator()
-    .addSubMenu(emailSubMenu)
+    .addItem("📄 Generate Monthly PDF",       "generateMonthlyPDF")
     .addSeparator()
-    .addItem("📄 Monthly PDF Job Summary",             "generateMonthlyPDF")
-    .addSeparator()
-    .addItem("🔍 Search Jobs",                         "searchJobs")
-    .addItem("🔄 Clear All Filters",                   "clearFilters")
-    .addSeparator()
-    .addItem("🎨 Refresh Row Colours",                 "refreshRowColors")
-    .addItem("🔗 Rebuild WhatsApp Links",              "rebuildWhatsAppFormulas")
+    .addItem("🔍 Search Jobs",               "searchJobs")
+    .addItem("🔄 Clear Filters",             "clearFilters")
+    .addItem("🎨 Refresh Row Colours",       "refreshRowColors")
+    .addItem("🔗 Rebuild Formulas",          "rebuildFormulas")
     .addToUi();
 }
 
 
-// ================================================================
-//  MAIN SETUP
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
+//  SETUP
+// ──────────────────────────────────────────────────────────────
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-  let ws = ss.getSheetByName(CFG.SHEET_NAME);
-  if (!ws) {
-    const sheets = ss.getSheets();
-    if (sheets.length === 1 && sheets[0].getName() === "Sheet1") {
-      ws = sheets[0];
-      ws.setName(CFG.SHEET_NAME);
-    } else {
-      ws = ss.insertSheet(CFG.SHEET_NAME, 0);
-    }
+  let sh = ss.getSheetByName(CFG.SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(CFG.SHEET_NAME);
+    const idx = sh.getIndex();
+    if (idx !== 1) ss.setActiveSheet(sh), ss.moveActiveSheet(1);
   }
 
-  ws.clear();
-  ws.clearConditionalFormatRules();
-  ws.setTabColor(P.HEADER_BG);
+  sh.clearContents();
+  sh.clearFormats();
 
-  _buildTitle(ws);
-  _buildHeaders(ws);
-  _applyColumnWidths(ws);
-  _setupValidation(ws);
-  _setupConditionalFormatting(ws);
-  _freezeAndFilter(ws);
-  _styleDataBand(ws, CFG.DATA_START, CFG.MAX_ROWS);
-  _addSampleData(ws);
-  _buildWaFormulas(ws);
+  _buildTitle(sh);
+  _buildGroupHeaders(sh);
+  _buildHeaders(sh);
+  _applyColumnWidths(sh);
+  _setupValidation(sh);
+  _setupConditionalFormatting(sh);
+  _freezeAndFilter(sh);
+  _styleDataBand(sh);
+  _addSampleData(sh);
+  _buildFormulas(sh);
 
-  SpreadsheetApp.getUi().alert(
-    "✅  Falcon Garage Job Tracker v2.0 — Ready!\n\n" +
-    "WHAT'S NEW IN v2.0:\n" +
-    "──────────────────────────────────────\n" +
-    "• Column U  — Customer Email address\n" +
-    "• Menu → 📧 Email Alerts  (3 options)\n" +
-    "• Menu → 📄 Monthly PDF Summary\n\n" +
-    "HOW TO USE:\n" +
-    "──────────────────────────────────────\n" +
-    "• Menu → 📋 New Job Card  (auto-numbers the job)\n" +
-    "• Fill columns C to T, add customer email in Column U\n" +
-    "• Column M  — choose status from dropdown\n" +
-    "• Column R  — click  📱 Send Update  to open WhatsApp\n" +
-    "• Menu → 📧 Email Alerts  to send email updates\n" +
-    "• Menu → 📄 Monthly PDF  to generate monthly reports\n\n" +
-    "⚠  IMPORTANT:\n" +
-    "Each row = one permanent job record.\n" +
-    "Never delete rows — just add new ones below."
-  );
+  SpreadsheetApp.getActiveSpreadsheet().toast("✅ Falcon Garage Tracker v3.0 ready!", "Setup Complete", 5);
 }
 
 
-// ================================================================
-//  TITLE & HEADERS
-// ================================================================
+// ──────────────────────────────────────────────────────────────
+//  TITLE  (rows 1–2)
+// ──────────────────────────────────────────────────────────────
+function _buildTitle(sh) {
+  const nc = CFG.TOTAL_COLS;
 
-function _buildTitle(ws) {
-  const tc = CFG.TOTAL_COLS;
+  // Row 1 — main title
+  sh.getRange(1, 1, 1, nc).merge()
+    .setValue(`🦅  ${CFG.GARAGE_NAME}  |  ${CFG.GARAGE_AR}  —  Job Update Tracker`)
+    .setBackground("#111827")
+    .setFontColor("#F59E0B")
+    .setFontSize(18).setFontWeight("bold")
+    .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  sh.setRowHeight(1, 48);
 
-  ws.setRowHeight(1, 52);
-  ws.getRange(1, 1, 1, tc)
-    .merge()
-    .setValue("🔧   FALCON GARAGE  |  JOB UPDATE TRACKER")
-    .setBackground(P.TITLE_BG)
-    .setFontColor(P.WHITE)
-    .setFontSize(20)
-    .setFontWeight("bold")
-    .setFontFamily("Arial")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-
-  ws.setRowHeight(2, 26);
-  ws.getRange(2, 1, 1, tc)
-    .merge()
-    .setValue(
-      "Manage Job Cards  ·  Track Repairs  ·  WhatsApp & Email Updates  ·  " +
-      "Monthly PDF Reports  ·  Permanent History"
-    )
-    .setBackground(P.HEADER_BG)
-    .setFontColor("#AACCEE")
+  // Row 2 — subtitle / contact bar
+  sh.getRange(2, 1, 1, nc).merge()
+    .setValue(`📞 ${CFG.GARAGE_TEL}   🌐 ${CFG.GARAGE_WEB}   ✉ ${CFG.GARAGE_EMAIL}   📍 ${CFG.GARAGE_ADDR}`)
+    .setBackground("#1F2937")
+    .setFontColor("#9CA3AF")
     .setFontSize(10)
-    .setFontStyle("italic")
-    .setFontFamily("Arial")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-}
-
-function _buildHeaders(ws) {
-  ws.setRowHeight(CFG.HEADER_ROW, 42);
-  ws.getRange(CFG.HEADER_ROW, 1, 1, HEADERS.length)
-    .setValues([HEADERS])
-    .setBackground(P.BAND_BG)
-    .setFontColor(P.WHITE)
-    .setFontSize(10)
-    .setFontWeight("bold")
-    .setFontFamily("Arial")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle")
-    .setWrap(true)
-    .setBorder(null, null, true, null, null, null,
-               P.TITLE_BG, SpreadsheetApp.BorderStyle.MEDIUM);
+    .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  sh.setRowHeight(2, 28);
 }
 
 
-// ================================================================
+// ──────────────────────────────────────────────────────────────
+//  GROUP HEADERS  (row 3)
+// ──────────────────────────────────────────────────────────────
+function _buildGroupHeaders(sh) {
+  sh.setRowHeight(CFG.GROUP_ROW, 26);
+  GROUPS.forEach(g => {
+    const r = sh.getRange(CFG.GROUP_ROW, g.s, 1, g.e - g.s + 1);
+    if (g.e > g.s) r.merge();
+    r.setValue(g.label)
+      .setBackground(g.bg).setFontColor(g.fg)
+      .setFontSize(10).setFontWeight("bold")
+      .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  });
+}
+
+
+// ──────────────────────────────────────────────────────────────
+//  COLUMN HEADERS  (row 4)
+// ──────────────────────────────────────────────────────────────
+function _buildHeaders(sh) {
+  sh.setRowHeight(CFG.HEADER_ROW, 40);
+  HEADERS.forEach((h, i) => {
+    sh.getRange(CFG.HEADER_ROW, i + 1)
+      .setValue(h)
+      .setBackground("#0F172A")
+      .setFontColor("#E2E8F0")
+      .setFontSize(9).setFontWeight("bold")
+      .setHorizontalAlignment("center").setVerticalAlignment("middle")
+      .setWrap(true);
+  });
+}
+
+
+// ──────────────────────────────────────────────────────────────
 //  COLUMN WIDTHS
-// ================================================================
-
-function _applyColumnWidths(ws) {
-  [120, 110, 160, 145, 200, 120, 175, 105,
-   250, 250, 285, 255, 195, 145, 150, 150,
-   145, 158, 140, 250, 210   // 21st = Customer Email
-  ].forEach((w, i) => ws.setColumnWidth(i + 1, w));
+// ──────────────────────────────────────────────────────────────
+function _applyColumnWidths(sh) {
+  const WIDTHS = {
+    1:100, 2:90,  3:70,  4:110, 5:95,  6:110, 7:100,
+    8:130, 9:120, 10:150,11:90,
+    12:90, 13:90, 14:90, 15:55, 16:130,17:80, 18:80,
+    19:200,20:200,21:150,
+    22:90, 23:90, 24:80, 25:80, 26:90, 27:110,28:90,
+    29:90, 30:90, 31:90, 32:100,
+    33:130,34:90,
+  };
+  Object.entries(WIDTHS).forEach(([col, w]) => sh.setColumnWidth(Number(col), w));
 }
 
 
-// ================================================================
-//  DATA VALIDATION (DROPDOWNS)
-// ================================================================
+// ──────────────────────────────────────────────────────────────
+//  DATA VALIDATION  (dropdowns)
+// ──────────────────────────────────────────────────────────────
+function _setupValidation(sh) {
+  const last = CFG.DATA_START + CFG.MAX_ROWS - 1;
 
-function _setupValidation(ws) {
-  const n = CFG.MAX_ROWS;
+  const dv = (list) =>
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(list, true)
+      .setAllowInvalid(false)
+      .build();
 
-  ws.getRange(CFG.DATA_START, C.STATUS, n, 1)
-    .setDataValidation(
-      SpreadsheetApp.newDataValidation()
-        .requireValueInList(STATUS_LIST, true)
-        .setAllowInvalid(false)
-        .setHelpText("Select the current repair status")
-        .build()
-    );
-
-  ws.getRange(CFG.DATA_START, C.READY, n, 1)
-    .setDataValidation(
-      SpreadsheetApp.newDataValidation()
-        .requireValueInList(YES_NO, true)
-        .setAllowInvalid(false)
-        .setHelpText("Is the vehicle ready for customer collection?")
-        .build()
-    );
-
-  ws.getRange(CFG.DATA_START, C.ALERT_SENT, n, 1)
-    .setDataValidation(
-      SpreadsheetApp.newDataValidation()
-        .requireValueInList(YES_NO, true)
-        .setAllowInvalid(false)
-        .setHelpText("Has the customer been notified?")
-        .build()
-    );
+  sh.getRange(CFG.DATA_START, C.STATUS,    CFG.MAX_ROWS, 1).setDataValidation(dv(STATUS_LIST));
+  sh.getRange(CFG.DATA_START, C.PRIORITY,  CFG.MAX_ROWS, 1).setDataValidation(dv(PRIORITY_LIST));
+  sh.getRange(CFG.DATA_START, C.JOB_TYPE,  CFG.MAX_ROWS, 1).setDataValidation(dv(JOB_TYPE_LIST));
+  sh.getRange(CFG.DATA_START, C.VEH_TYPE,  CFG.MAX_ROWS, 1).setDataValidation(dv(VEH_TYPE_LIST));
+  sh.getRange(CFG.DATA_START, C.PAY_STATUS,CFG.MAX_ROWS, 1).setDataValidation(dv(PAY_LIST));
 }
 
 
-// ================================================================
-//  CONDITIONAL FORMATTING  (status-based row colours)
-// ================================================================
+// ──────────────────────────────────────────────────────────────
+//  CONDITIONAL FORMATTING  (row-level colours by status)
+// ──────────────────────────────────────────────────────────────
+function _setupConditionalFormatting(sh) {
+  const dataRange = sh.getRange(CFG.DATA_START, 1, CFG.MAX_ROWS, CFG.TOTAL_COLS);
+  const statusCol = _colLetter(C.STATUS);
+  const rules = [];
 
-function _setupConditionalFormatting(ws) {
-  const endRow     = CFG.DATA_START + CFG.MAX_ROWS - 1;
-  const lastColLtr = _colLetter(CFG.TOTAL_COLS);
-  const range      = ws.getRange(`A${CFG.DATA_START}:${lastColLtr}${endRow}`);
-
-  const rules = [
-    { status: "Waiting Customer Approval", bg: P.RED_BG, fg: P.RED_FG },
-    { status: "Parts Ordered",             bg: P.ORG_BG, fg: P.ORG_FG },
-    { status: "Additional Work Required",  bg: P.ORG_BG, fg: P.ORG_FG },
-    { status: "Repair In Progress",        bg: P.BLU_BG, fg: P.BLU_FG },
-    { status: "Work Finished",             bg: P.GRN_BG, fg: P.GRN_FG },
-    { status: "Ready for Collection",      bg: P.GRN_BG, fg: P.GRN_FG },
-    { status: "Delivered",                 bg: P.GRY_BG, fg: P.GRY_FG },
-  ].map(fmt =>
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied(`=$M${CFG.DATA_START}="${fmt.status}"`)
-      .setBackground(fmt.bg)
-      .setFontColor(fmt.fg)
-      .setRanges([range])
-      .build()
-  );
-
-  ws.setConditionalFormatRules(rules);
-}
-
-
-// ================================================================
-//  FREEZE PANES & AUTO-FILTER
-// ================================================================
-
-function _freezeAndFilter(ws) {
-  ws.setFrozenRows(CFG.HEADER_ROW);
-  ws.setFrozenColumns(1);
-  ws.getRange(CFG.HEADER_ROW, 1, 1, CFG.TOTAL_COLS).createFilter();
-}
-
-
-// ================================================================
-//  ROW BAND STYLING
-// ================================================================
-
-function _styleDataBand(ws, startRow, numRows) {
-  const tc = CFG.TOTAL_COLS;
-  const full = ws.getRange(startRow, 1, numRows, tc);
-  full.setFontFamily("Arial")
-      .setFontSize(10)
-      .setVerticalAlignment("middle")
-      .setBorder(true, true, true, true, true, true,
-                 P.BORDER, SpreadsheetApp.BorderStyle.SOLID);
-
-  for (let i = 0; i < numRows; i++) {
-    ws.getRange(startRow + i, 1, 1, tc)
-      .setBackground(i % 2 === 0 ? P.ROW_A : P.ROW_B);
-    ws.setRowHeight(startRow + i, 22);
-  }
-
-  ws.getRange(startRow, C.JOB_CARD, numRows, 1)
-    .setFontWeight("bold").setFontColor(P.ACCENT);
-
-  [C.DATE_OPENED, C.MOBILE, C.MILEAGE, C.STATUS,
-   C.READY, C.UPDATE_DATE, C.PLATE, C.ALERT_SENT].forEach(col =>
-    ws.getRange(startRow, col, numRows, 1).setHorizontalAlignment("center")
-  );
-
-  ws.getRange(startRow, C.DATE_OPENED, numRows, 1).setNumberFormat("DD-MMM-YYYY");
-  ws.getRange(startRow, C.UPDATE_DATE, numRows, 1).setNumberFormat("DD-MMM-YYYY HH:mm");
-  ws.getRange(startRow, C.MILEAGE,     numRows, 1).setNumberFormat("#,##0");
-  ws.getRange(startRow, C.STATUS,      numRows, 1).setFontWeight("bold");
-  ws.getRange(startRow, C.READY,       numRows, 1).setFontWeight("bold");
-
-  [C.COMPLAINT, C.DIAGNOSIS, C.WORK_DONE, C.PARTS, C.REMARKS].forEach(col =>
-    ws.getRange(startRow, col, numRows, 1).setWrap(true)
-  );
-
-  ws.getRange(startRow, C.EMAIL, numRows, 1)
-    .setFontColor("#1A6FAE")
-    .setHorizontalAlignment("center");
-}
-
-
-// ================================================================
-//  WHATSAPP HYPERLINK FORMULA
-// ================================================================
-
-function _waFormula(row) {
-  const g = CFG.GARAGE_NAME;
-  return (
-    `=IF(A${row}="","",` +
-    `HYPERLINK(` +
-      `"https://wa.me/"` +
-      `&REGEXREPLACE(D${row},"[^0-9]","")` +
-      `&"?text="` +
-      `&ENCODEURL(` +
-        `"Dear "&C${row}&","` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Vehicle Update – ${g}"` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Job Card: "&A${row}` +
-        `&CHAR(10)` +
-        `&"Vehicle: "&E${row}&" | "&F${row}` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Work Completed:"` +
-        `&CHAR(10)&IF(K${row}="","N/A",K${row})` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Parts Changed:"` +
-        `&CHAR(10)&IF(L${row}="","N/A",L${row})` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Current Status:"` +
-        `&CHAR(10)&IF(M${row}="","Not Set",M${row})` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Ready for Collection:"` +
-        `&CHAR(10)&IF(N${row}="","Pending",N${row})` +
-        `&CHAR(10)&CHAR(10)` +
-        `&"Thank you,"` +
-        `&CHAR(10)&"${g}"` +
-      `)` +
-    `,"📱 Send Update"))`
-  );
-}
-
-function _buildWaFormulas(ws) {
-  const endRow = CFG.DATA_START + CFG.MAX_ROWS - 1;
-  for (let row = CFG.DATA_START; row <= endRow; row++) {
-    ws.getRange(row, C.WHATSAPP).setFormula(_waFormula(row));
-  }
-  ws.getRange(CFG.DATA_START, C.WHATSAPP, CFG.MAX_ROWS, 1)
-    .setFontColor(P.LINK)
-    .setFontWeight("bold")
-    .setHorizontalAlignment("center");
-}
-
-
-// ================================================================
-//  SAMPLE DATA  (3 demo job cards)
-// ================================================================
-
-function _addSampleData(ws) {
-  if (ws.getRange(CFG.DATA_START, C.JOB_CARD).getValue()) return;
-
-  const now = new Date();
-  const d1  = new Date(now); d1.setDate(d1.getDate() - 2);
-  const d2  = new Date(now); d2.setDate(d2.getDate() - 1);
-
-  const rows = [
-    [
-      "FG-2024-001", d1, "Ahmed Al Rashidi", "+971501234567",
-      "Toyota Land Cruiser 2020", "DXB-A-12345", "JTMHX02J504012345", 85000,
-      "Engine overheating. AC not cooling.",
-      "Coolant leak at upper hose. AC compressor low pressure.",
-      "Replaced upper radiator hose. Re-gassed AC system. Full road test passed.",
-      "Upper radiator hose × 1, AC refrigerant R134a 800 g",
-      "Work Finished", "YES", "Mohammed Hassan", "Khalid Mansoor",
-      now, "", "YES", "Customer confirmed collection tomorrow morning.",
-      "ahmed.rashidi@email.com",
-    ],
-    [
-      "FG-2024-002", d2, "Sara Al Mansoori", "+971502345678",
-      "Nissan Patrol 2019", "AUH-B-67890", "JN8AZ2KR5BT012345", 120000,
-      "Gearbox slipping on 2nd gear. Whining noise at speed.",
-      "Gearbox oil burnt black. Solenoid pack faulty. Torque converter suspect.",
-      "", "",
-      "Waiting Customer Approval", "NO", "Faisal Al Zaabi", "Khalid Mansoor",
-      d2, "", "NO", "Gearbox overhaul quote: AED 4,200. Awaiting customer go-ahead.",
-      "sara.mansoori@email.com",
-    ],
-    [
-      "FG-2024-003", now, "James Wilson", "+971503456789",
-      "BMW X5 xDrive40i 2021", "SHJ-C-11111", "5UXKR6C56F0K12345", 45000,
-      "Check engine light on. Steering vibration above 80 km/h.",
-      "Fault P0138: O2 sensor bank 1. Front brake discs warped.",
-      "Replacing front brake discs and pads. Fitting new O2 sensor bank 1.",
-      "Front brake discs × 2, front brake pads set, O2 sensor B1S2",
-      "Parts Ordered", "NO", "Mohammed Hassan", "David Chen",
-      now, "", "YES", "Parts ETA 2 business days. Customer informed via WhatsApp.",
-      "james.wilson@email.com",
-    ],
+  const statuses = [
+    ["Open",        "#FF4444","#FFFFFF"],
+    ["In Progress", "#1565C0","#FFFFFF"],
+    ["Body Shop",   "#5D4037","#FFFFFF"],
+    ["QC",          "#6A1B9A","#FFFFFF"],
+    ["Ready",       "#2E7D32","#FFFFFF"],
+    ["Delivered",   "#004D40","#CCFFCC"],
+    ["On Hold",     "#37474F","#CFD8DC"],
   ];
 
-  ws.getRange(CFG.DATA_START, 1, rows.length, CFG.TOTAL_COLS).setValues(rows);
+  statuses.forEach(([kw, bg, fg]) => {
+    rules.push(
+      SpreadsheetApp.newConditionalFormatRule()
+        .whenFormulaSatisfied(`=NOT(ISBLANK($${statusCol}${CFG.DATA_START}))*ISNUMBER(SEARCH("${kw}",$${statusCol}${CFG.DATA_START}))`)
+        .setBackground(bg).setFontColor(fg)
+        .setRanges([dataRange])
+        .build()
+    );
+  });
+
+  sh.setConditionalFormatRules(rules);
 }
 
 
-// ================================================================
-//  onEdit TRIGGER  — auto-timestamp, auto-set Ready, rebuild WA
-// ================================================================
+// ──────────────────────────────────────────────────────────────
+//  FREEZE + FILTER
+// ──────────────────────────────────────────────────────────────
+function _freezeAndFilter(sh) {
+  sh.setFrozenRows(CFG.HEADER_ROW);
+  sh.setFrozenColumns(1);
+  sh.getRange(CFG.HEADER_ROW, 1, 1, CFG.TOTAL_COLS).createFilter();
+}
 
+
+// ──────────────────────────────────────────────────────────────
+//  ALTERNATING ROW BAND  (zebra stripes for empty data rows)
+// ──────────────────────────────────────────────────────────────
+function _styleDataBand(sh) {
+  for (let r = CFG.DATA_START; r < CFG.DATA_START + CFG.MAX_ROWS; r++) {
+    const bg = (r % 2 === 0) ? "#1A2332" : "#111827";
+    sh.getRange(r, 1, 1, CFG.TOTAL_COLS).setBackground(bg).setFontColor("#D1D5DB").setFontSize(9);
+  }
+}
+
+
+// ──────────────────────────────────────────────────────────────
+//  FORMULA HELPERS
+// ──────────────────────────────────────────────────────────────
+function _vatFormula(row) {
+  const v = _colLetter(C.PARTS_QAR);
+  const w = _colLetter(C.LABOUR_QAR);
+  const x = _colLetter(C.DISCOUNT);
+  return `=IF(${v}${row}+${w}${row}>0,ROUND(MAX(0,${v}${row}+${w}${row}-${x}${row})*0.05,2),0)`;
+}
+
+function _totalFormula(row) {
+  const v = _colLetter(C.PARTS_QAR);
+  const w = _colLetter(C.LABOUR_QAR);
+  const x = _colLetter(C.DISCOUNT);
+  const y = _colLetter(C.VAT_QAR);
+  return `=IF(${v}${row}+${w}${row}>0,ROUND(MAX(0,${v}${row}+${w}${row}-${x}${row})+${y}${row},2),0)`;
+}
+
+function _waFormula(row) {
+  const ph = _colLetter(C.PHONE);
+  const jc = _colLetter(C.JOB_ID);
+  const nm = _colLetter(C.CUST_NAME);
+  const mk = _colLetter(C.MAKE);
+  const md = _colLetter(C.MODEL);
+  const pl = _colLetter(C.PLATE);
+  const st = _colLetter(C.STATUS);
+  const tot= _colLetter(C.TOTAL_QAR);
+  return `=IF(${ph}${row}="","",HYPERLINK("https://wa.me/974"&REGEXREPLACE(${ph}${row},"[^0-9]","")&"?text="&ENCODEURL("Dear "${nm}${row}", your vehicle ("${mk}${row}" "${md}${row}" | Plate: "${pl}${row}") — Job: "${jc}${row}" | Status: "${st}${row}" | Total: QAR "${tot}${row}". Thank you — Falcon Garage, Doha +974 4486 2018"),"📱 WhatsApp"))`;
+}
+
+
+// ──────────────────────────────────────────────────────────────
+//  BUILD FORMULAS FOR ALL EXISTING DATA ROWS
+// ──────────────────────────────────────────────────────────────
+function _buildFormulas(sh) {
+  const lastRow = Math.max(sh.getLastRow(), CFG.DATA_START - 1);
+  if (lastRow < CFG.DATA_START) return;
+  for (let r = CFG.DATA_START; r <= lastRow; r++) {
+    sh.getRange(r, C.VAT_QAR  ).setFormula(_vatFormula(r));
+    sh.getRange(r, C.TOTAL_QAR).setFormula(_totalFormula(r));
+    sh.getRange(r, C.WA_LINK  ).setFormula(_waFormula(r));
+  }
+}
+
+
+// ──────────────────────────────────────────────────────────────
+//  SAMPLE DATA  (5 rows from JOB DATABASE)
+// ──────────────────────────────────────────────────────────────
+function _addSampleData(sh) {
+  const today = new Date();
+  const fmt = (d) => Utilities.formatDate(d, Session.getScriptTimeZone(), "dd/MM/yyyy");
+  const rows = [
+    ["JC-2026-001", fmt(today), "08:30", "✅ Delivered", "🟢 NORMAL", "Oil Change",      "Ahmed Al-Rashidi", "Mohammed Al-Hamad", "+974 5512 3456", "m.alhamad@email.com", "QID-28843721", "A 12345","Toyota","Land Cruiser","2022","JTMCV02J204045321","62000 km","SUV",         "Routine oil change & filter","Completed oil change, replaced filter","Engine oil 5L, oil filter",         350, 150, 0, "", "", "Cash",            "Pending", "EST-001", "INV-001", fmt(today), "Ahmed Al-Rashidi", "", ""],
+    ["JC-2026-002", fmt(today), "09:15", "🟢 Ready",     "🔴 URGENT", "AC Repair",       "Khalid Al-Sayed",  "Sarah Johnson",     "+974 6623 4567", "s.johnson@gmail.com","QID-39124568", "B 67890","Nissan","Patrol","2020","JN8AY2ND5L9760412", "45200 km","SUV",         "AC not cooling at all",     "Replaced compressor & recharged","AC Compressor, refrigerant gas",    1200, 450, 0, "", "", "Card",            "Pending", "EST-002", "INV-002", "",        "Khalid Al-Sayed",  "", ""],
+    ["JC-2026-003", fmt(today), "10:00", "🔵 In Progress","🟡 HIGH",  "Body Repair",     "Yousuf Ibrahim",   "Ali Karimi",        "+974 7734 5678", "ali.karimi@work.qa", "QID-45231890", "C 11111","BMW","5 Series","2021","WBA13BJ08MCF62831", "31500 km","Sedan",       "Front bumper damage",       "Dent removal in progress",       "Bumper paint, filler compound",     800, 600, 50,"", "", "Bank Transfer",    "Pending", "EST-003", "",        "",        "Yousuf Ibrahim",   "", ""],
+    ["JC-2026-004", fmt(today), "11:30", "🔴 Open",      "🟢 NORMAL", "General Service", "Fatima Al-Dosari", "Rania Khalil",      "+974 3345 6789", "rania.k@hotmail.com","QID-56342901", "D 22222","Mercedes","C-Class","2023","WDD2050422R456789", "15000 km","Sedan",       "Full service check",        "Awaiting technician assignment", "Service kit, brake pads",           500, 300, 25,"", "", "Cash",            "Pending", "EST-004", "",        "",        "",                 "", ""],
+    ["JC-2026-005", fmt(today), "13:00", "🔧 Body Shop",  "🟡 HIGH",  "Tyres / Alignment","Hassan Al-Mansoor","James O'Brien",     "+974 5567 8901", "james.ob@corp.net",  "QID-67453012", "E 33333","Ford","F-150","2019","1FTEW1E55KKC24680", "78900 km","Pick-up",      "Wheel alignment & new tyres","Alignment done, fitting tyres",   "4x Michelin LTX tyres",             1800, 250, 100,"","", "Credit",          "Pending", "EST-005", "",        "",        "Hassan Al-Mansoor","", ""],
+  ];
+
+  rows.forEach((row, i) => {
+    const r = CFG.DATA_START + i;
+    sh.getRange(r, 1, 1, row.length).setValues([row]);
+  });
+
+  // Apply formulas over sample rows
+  for (let r = CFG.DATA_START; r < CFG.DATA_START + rows.length; r++) {
+    sh.getRange(r, C.VAT_QAR  ).setFormula(_vatFormula(r));
+    sh.getRange(r, C.TOTAL_QAR).setFormula(_totalFormula(r));
+    sh.getRange(r, C.WA_LINK  ).setFormula(_waFormula(r));
+  }
+}
+
+
+// ──────────────────────────────────────────────────────────────
+//  onEdit  — live row colouring + stamp update date
+// ──────────────────────────────────────────────────────────────
 function onEdit(e) {
-  if (!e) return;
-  const ws  = e.range.getSheet();
-  if (ws.getName() !== CFG.SHEET_NAME) return;
-
+  const sh = e.range.getSheet();
+  if (sh.getName() !== CFG.SHEET_NAME) return;
   const row = e.range.getRow();
   const col = e.range.getColumn();
   if (row < CFG.DATA_START) return;
 
-  const stampTriggers = [
-    C.JOB_CARD, C.CUST_NAME, C.MOBILE, C.VEHICLE, C.PLATE, C.VIN,
-    C.MILEAGE, C.COMPLAINT, C.DIAGNOSIS, C.WORK_DONE, C.PARTS,
-    C.STATUS, C.READY, C.TECHNICIAN, C.ADVISOR, C.REMARKS, C.EMAIL,
-  ];
-
-  if (stampTriggers.includes(col)) {
-    ws.getRange(row, C.UPDATE_DATE)
-      .setValue(new Date())
-      .setNumberFormat("DD-MMM-YYYY HH:mm");
-  }
-
-  if (col === C.JOB_CARD) {
-    const dateCell = ws.getRange(row, C.DATE_OPENED);
-    if (!dateCell.getValue()) {
-      dateCell.setValue(new Date()).setNumberFormat("DD-MMM-YYYY");
-    }
-  }
-
   if (col === C.STATUS) {
-    const status = ws.getRange(row, C.STATUS).getValue();
-    if (status === "Ready for Collection" || status === "Delivered") {
-      if (!ws.getRange(row, C.READY).getValue()) {
-        ws.getRange(row, C.READY).setValue("YES");
+    const val = (e.value || "").toString();
+    let matched = false;
+    for (const [kw, colours] of Object.entries(STATUS_COLOURS)) {
+      if (val.includes(kw)) {
+        sh.getRange(row, 1, 1, CFG.TOTAL_COLS)
+          .setBackground(colours.bg).setFontColor(colours.fg);
+        matched = true;
+        break;
       }
     }
+    if (!matched) {
+      const bg = (row % 2 === 0) ? "#1A2332" : "#111827";
+      sh.getRange(row, 1, 1, CFG.TOTAL_COLS).setBackground(bg).setFontColor("#D1D5DB");
+    }
+    // stamp AE (Date Out) when Delivered
+    if (val.includes("Delivered") && !sh.getRange(row, C.DATE_OUT).getValue()) {
+      sh.getRange(row, C.DATE_OUT).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy"));
+    }
   }
 
-  const waTriggers = [
-    C.JOB_CARD, C.CUST_NAME, C.MOBILE, C.VEHICLE, C.PLATE,
-    C.WORK_DONE, C.PARTS, C.STATUS, C.READY,
-  ];
-  if (waTriggers.includes(col)) {
-    ws.getRange(row, C.WHATSAPP)
-      .setFormula(_waFormula(row))
-      .setFontColor(P.LINK)
-      .setFontWeight("bold")
-      .setHorizontalAlignment("center");
+  // Auto-stamp Date In / Time In on new Job ID entry
+  if (col === C.JOB_ID && e.value) {
+    if (!sh.getRange(row, C.DATE_IN).getValue())
+      sh.getRange(row, C.DATE_IN).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy"));
+    if (!sh.getRange(row, C.TIME_IN).getValue())
+      sh.getRange(row, C.TIME_IN).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm"));
+  }
+
+  // Ensure formulas present when financial cols or phone is edited
+  if ([C.PARTS_QAR, C.LABOUR_QAR, C.DISCOUNT, C.PHONE].includes(col)) {
+    sh.getRange(row, C.VAT_QAR  ).setFormula(_vatFormula(row));
+    sh.getRange(row, C.TOTAL_QAR).setFormula(_totalFormula(row));
+    sh.getRange(row, C.WA_LINK  ).setFormula(_waFormula(row));
   }
 }
 
 
-// ================================================================
-//  NEW JOB CARD
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
+//  CREATE NEW JOB CARD
+// ──────────────────────────────────────────────────────────────
 function createNewJobCard() {
-  const ws = _getSheet(); if (!ws) return;
+  const sh = _getSheet();
+  const newId = _nextJobId(sh);
+  const lastRow = sh.getLastRow();
+  const newRow = Math.max(lastRow + 1, CFG.DATA_START);
+  const now = new Date();
+  const tz  = Session.getScriptTimeZone();
 
-  const nextRow   = Math.max(ws.getLastRow() + 1, CFG.DATA_START);
-  const jobCardNo = _nextJobCardNo(ws);
+  sh.getRange(newRow, C.JOB_ID ).setValue(newId);
+  sh.getRange(newRow, C.DATE_IN).setValue(Utilities.formatDate(now, tz, "dd/MM/yyyy"));
+  sh.getRange(newRow, C.TIME_IN).setValue(Utilities.formatDate(now, tz, "HH:mm"));
+  sh.getRange(newRow, C.STATUS ).setValue("🔴 Open");
+  sh.getRange(newRow, C.PRIORITY).setValue("🟢 NORMAL");
+  sh.getRange(newRow, C.VAT_QAR  ).setFormula(_vatFormula(newRow));
+  sh.getRange(newRow, C.TOTAL_QAR).setFormula(_totalFormula(newRow));
+  sh.getRange(newRow, C.WA_LINK  ).setFormula(_waFormula(newRow));
 
-  ws.getRange(nextRow, C.JOB_CARD)
-    .setValue(jobCardNo).setFontWeight("bold").setFontColor(P.ACCENT);
-  ws.getRange(nextRow, C.DATE_OPENED)
-    .setValue(new Date()).setNumberFormat("DD-MMM-YYYY");
-  ws.getRange(nextRow, C.STATUS).setValue("Vehicle Received");
-  ws.getRange(nextRow, C.READY).setValue("NO");
-  ws.getRange(nextRow, C.ALERT_SENT).setValue("NO");
-  ws.getRange(nextRow, C.UPDATE_DATE)
-    .setValue(new Date()).setNumberFormat("DD-MMM-YYYY HH:mm");
-  ws.getRange(nextRow, C.WHATSAPP)
-    .setFormula(_waFormula(nextRow))
-    .setFontColor(P.LINK).setFontWeight("bold").setHorizontalAlignment("center");
+  // style new row
+  sh.getRange(newRow, 1, 1, CFG.TOTAL_COLS)
+    .setBackground("#FF4444").setFontColor("#FFFFFF").setFontSize(9);
 
-  _styleDataBand(ws, nextRow, 1);
-  SpreadsheetApp.setActiveSheet(ws);
-  ws.setActiveRange(ws.getRange(nextRow, C.CUST_NAME));
-
-  SpreadsheetApp.getUi().alert(
-    `✅  New Job Card Created\n\n` +
-    `Job Card No : ${jobCardNo}\n` +
-    `Row         : ${nextRow}\n\n` +
-    `Fill in customer & vehicle details.\n` +
-    `Add customer email in Column U for email alerts.`
-  );
+  sh.setActiveRange(sh.getRange(newRow, C.CUST_NAME));
+  SpreadsheetApp.getActiveSpreadsheet().toast(`✅ New job created: ${newId}`, "New Job", 4);
 }
 
-function _nextJobCardNo(ws) {
-  const year   = new Date().getFullYear();
+function _nextJobId(sh) {
+  const year  = new Date().getFullYear();
   const prefix = `${CFG.JOB_PREFIX}-${year}-`;
-  const last   = ws.getLastRow();
-  if (last < CFG.DATA_START) return `${prefix}001`;
-
-  const existing = ws
-    .getRange(CFG.DATA_START, C.JOB_CARD, last - CFG.DATA_START + 1, 1)
-    .getValues().flat()
-    .filter(v => String(v).startsWith(prefix))
-    .map(v => parseInt(String(v).replace(prefix, ""), 10) || 0);
-
-  const max = existing.length ? Math.max(...existing) : 0;
+  const data  = sh.getRange(CFG.DATA_START, C.JOB_ID, sh.getLastRow() - CFG.DATA_START + 1, 1).getValues();
+  let max = 0;
+  data.forEach(([v]) => {
+    if (typeof v === "string" && v.startsWith(prefix)) {
+      const n = parseInt(v.replace(prefix, ""), 10);
+      if (!isNaN(n) && n > max) max = n;
+    }
+  });
   return `${prefix}${String(max + 1).padStart(3, "0")}`;
 }
 
 
-// ================================================================
-//  OPEN WHATSAPP  — modal dialog with clickable button
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
+//  WHATSAPP
+// ──────────────────────────────────────────────────────────────
 function openWhatsAppForActiveRow() {
-  const ws = _getSheet(); if (!ws) return;
-
-  const row = ws.getActiveRange().getRow();
-  if (row < CFG.DATA_START) {
-    SpreadsheetApp.getUi().alert(
-      "⚠️  Please click on a job data row first (row 4 or below)."
-    );
-    return;
-  }
-
-  const v        = ws.getRange(row, 1, 1, CFG.TOTAL_COLS).getValues()[0];
-  const jobCard  = v[C.JOB_CARD - 1]  || "N/A";
-  const custName = v[C.CUST_NAME - 1] || "Customer";
-  const mobile   = String(v[C.MOBILE - 1]).replace(/[^0-9]/g, "");
-  const vehicle  = v[C.VEHICLE - 1]   || "N/A";
-  const plate    = v[C.PLATE - 1]     || "N/A";
-  const workDone = v[C.WORK_DONE - 1] || "In Progress";
-  const parts    = v[C.PARTS - 1]     || "N/A";
-  const status   = v[C.STATUS - 1]    || "Not Set";
-  const ready    = v[C.READY - 1]     || "Pending";
-
-  if (!mobile) {
-    SpreadsheetApp.getUi().alert(
-      "⚠️  No mobile number found in Column D for this row."
-    );
-    return;
-  }
-
-  const message =
-    `Dear ${custName},\n\n` +
-    `Vehicle Update – ${CFG.GARAGE_NAME}\n\n` +
-    `Job Card: ${jobCard}\n` +
-    `Vehicle: ${vehicle} | ${plate}\n\n` +
-    `Work Completed:\n${workDone}\n\n` +
-    `Parts Changed:\n${parts}\n\n` +
-    `Current Status:\n${status}\n\n` +
-    `Ready for Collection:\n${ready}\n\n` +
-    `Thank you,\n${CFG.GARAGE_NAME}`;
-
-  const waUrl   = `https://wa.me/${mobile}?text=${encodeURIComponent(message)}`;
-  const safeMsg = message
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-  const html = HtmlService.createHtmlOutput(`
-    <!DOCTYPE html><html><head>
-    <style>
-      body  { font-family:Arial,sans-serif; padding:18px; margin:0; color:#222; }
-      h3    { color:#1A3A5C; margin:0 0 12px; font-size:16px; }
-      .info { background:#EBF5FB; border-left:4px solid #2980B9;
-              padding:8px 12px; border-radius:4px; font-size:13px; margin-bottom:14px; }
-      .btn  { display:block; width:100%; box-sizing:border-box;
-              padding:13px; background:#25D366; color:#fff; font-size:16px;
-              font-weight:bold; text-align:center; text-decoration:none;
-              border-radius:8px; margin-bottom:10px; }
-      .btn:hover { background:#1ebe57; }
-      summary { cursor:pointer; color:#555; font-size:12px; margin-top:8px; }
-      pre   { background:#f5f5f5; padding:10px; border-radius:4px;
-              font-size:11px; white-space:pre-wrap; word-break:break-word; margin-top:6px; }
-    </style></head><body>
-      <h3>📱 WhatsApp Update — ${jobCard}</h3>
-      <div class="info">
-        <b>Customer:</b> ${custName} &nbsp;|&nbsp; <b>Mobile:</b> +${mobile}
-      </div>
-      <a class="btn" href="${waUrl}" target="_blank">📱 Open WhatsApp Now</a>
-      <p style="font-size:11px;color:#888;margin:4px 0 0;">
-        WhatsApp Web (or desktop app) will open with the message pre-filled.
-      </p>
-      <details>
-        <summary>▸ Preview message</summary>
-        <pre>${safeMsg}</pre>
-      </details>
-    </body></html>
-  `).setWidth(400).setHeight(310);
-
-  SpreadsheetApp.getUi().showModalDialog(html, "Send WhatsApp Update");
-
-  ws.getRange(row, C.UPDATE_DATE)
-    .setValue(new Date())
-    .setNumberFormat("DD-MMM-YYYY HH:mm");
+  const sh  = _getSheet();
+  const row = sh.getActiveRange().getRow();
+  if (row < CFG.DATA_START) { SpreadsheetApp.getUi().alert("Please select a data row first."); return; }
+  const url = sh.getRange(row, C.WA_LINK).getValue();
+  if (!url) { SpreadsheetApp.getUi().alert("No WhatsApp link — check that Phone is filled in."); return; }
+  const html = HtmlService.createHtmlOutput(`<script>window.open("${url}","_blank");google.script.host.close();</script>`)
+    .setWidth(10).setHeight(10);
+  SpreadsheetApp.getUi().showModalDialog(html, "Opening WhatsApp…");
+  sh.getRange(row, C.ALERT_SENT).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm"));
 }
-
-
-// ================================================================
-//  STAMP UPDATE DATE
-// ================================================================
 
 function stampUpdateDate() {
-  const ws = _getSheet(); if (!ws) return;
-  const row = ws.getActiveRange().getRow();
-  if (row < CFG.DATA_START) {
-    SpreadsheetApp.getUi().alert("Please select a data row first."); return;
-  }
-  const now = new Date();
-  ws.getRange(row, C.UPDATE_DATE).setValue(now).setNumberFormat("DD-MMM-YYYY HH:mm");
-  SpreadsheetApp.getUi().alert(`✅  Date stamped: ${now.toLocaleString()}`);
+  const sh  = _getSheet();
+  const row = sh.getActiveRange().getRow();
+  if (row < CFG.DATA_START) return;
+  sh.getRange(row, C.ALERT_SENT).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm"));
 }
 
 
-// ================================================================
-//  SEARCH JOBS
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
+//  SEARCH / FILTER
+// ──────────────────────────────────────────────────────────────
 function searchJobs() {
-  const ui  = SpreadsheetApp.getUi();
-  const res = ui.prompt(
-    "🔍 Search Jobs",
-    "Type a Job Card No, Customer Name, Plate Number, or Vehicle:",
-    ui.ButtonSet.OK_CANCEL
-  );
-  if (res.getSelectedButton() !== ui.Button.OK) return;
+  const ui   = SpreadsheetApp.getUi();
+  const resp = ui.prompt("🔍 Search Jobs", "Enter job ID, customer name, or plate number:", ui.ButtonSet.OK_CANCEL);
+  if (resp.getSelectedButton() !== ui.Button.OK) return;
+  const term = resp.getResponseText().trim().toLowerCase();
+  if (!term) return;
 
-  const query = res.getResponseText().trim().toLowerCase();
-  if (!query) return;
+  const sh    = _getSheet();
+  const last  = sh.getLastRow();
+  if (last < CFG.DATA_START) return;
 
-  const ws   = _getSheet(); if (!ws) return;
-  const last = ws.getLastRow();
-  if (last < CFG.DATA_START) { ui.alert("No job data found."); return; }
-
-  const searchCols = [C.JOB_CARD, C.CUST_NAME, C.VEHICLE, C.PLATE];
+  const data = sh.getRange(CFG.DATA_START, 1, last - CFG.DATA_START + 1, CFG.TOTAL_COLS).getValues();
   const hits = [];
-
-  for (let row = CFG.DATA_START; row <= last; row++) {
-    const data = ws.getRange(row, 1, 1, CFG.TOTAL_COLS).getValues()[0];
-    if (searchCols.some(col => String(data[col - 1]).toLowerCase().includes(query))) {
-      hits.push({
-        row,
-        jobCard:  data[C.JOB_CARD - 1],
-        customer: data[C.CUST_NAME - 1],
-        vehicle:  data[C.VEHICLE - 1],
-        plate:    data[C.PLATE - 1],
-        status:   data[C.STATUS - 1],
-      });
-    }
-  }
-
-  if (!hits.length) { ui.alert(`No records found for: "${query}"`); return; }
-
-  let msg = `Found ${hits.length} result(s) for "${query}":\n\n`;
-  hits.forEach((h, i) => {
-    msg += `${i + 1}.  Row ${h.row}  |  ${h.jobCard}  |  ${h.customer}\n`;
-    msg += `    Vehicle: ${h.vehicle}  (${h.plate})\n`;
-    msg += `    Status:  ${h.status}\n\n`;
+  data.forEach((row, i) => {
+    const searchable = [row[C.JOB_ID-1], row[C.CUST_NAME-1], row[C.PLATE-1], row[C.PHONE-1]].join(" ").toLowerCase();
+    if (searchable.includes(term)) hits.push(CFG.DATA_START + i);
   });
 
-  if (hits.length === 1) {
-    ws.setActiveRange(ws.getRange(hits[0].row, 1));
-    ui.alert(msg + "(Navigated to record)");
-  } else {
-    ui.alert(msg + "Tip: Use the column filter arrows to narrow down further.");
-  }
+  if (!hits.length) { ui.alert(`No results for "${term}".`); return; }
+  sh.setActiveRange(sh.getRange(hits[0], 1));
+  SpreadsheetApp.getActiveSpreadsheet().toast(`Found ${hits.length} result(s) — first match highlighted.`, "Search", 4);
 }
-
-
-// ================================================================
-//  CLEAR FILTERS
-// ================================================================
 
 function clearFilters() {
-  const ws = _getSheet(); if (!ws) return;
-  const f  = ws.getFilter();
-  if (f) {
-    f.remove();
-    ws.getRange(CFG.HEADER_ROW, 1, 1, CFG.TOTAL_COLS).createFilter();
-  }
-  SpreadsheetApp.getUi().alert("✅  All filters cleared.");
+  const sh = _getSheet();
+  const f  = sh.getFilter();
+  if (f) f.remove();
+  sh.getRange(CFG.HEADER_ROW, 1, 1, CFG.TOTAL_COLS).createFilter();
+  SpreadsheetApp.getActiveSpreadsheet().toast("Filters cleared.", "Done", 3);
 }
-
-
-// ================================================================
-//  REFRESH ROW COLOURS
-// ================================================================
 
 function refreshRowColors() {
-  const ws = _getSheet(); if (!ws) return;
-  const n  = Math.max(ws.getLastRow() - CFG.DATA_START + 1, CFG.MAX_ROWS);
-  _styleDataBand(ws, CFG.DATA_START, n);
-  ws.clearConditionalFormatRules();
-  _setupConditionalFormatting(ws);
-  SpreadsheetApp.getUi().alert("✅  Row colours and conditional formatting refreshed.");
+  const sh   = _getSheet();
+  const last = sh.getLastRow();
+  if (last < CFG.DATA_START) return;
+  const statuses = sh.getRange(CFG.DATA_START, C.STATUS, last - CFG.DATA_START + 1, 1).getValues();
+  statuses.forEach(([v], i) => {
+    const row = CFG.DATA_START + i;
+    let matched = false;
+    for (const [kw, colours] of Object.entries(STATUS_COLOURS)) {
+      if (String(v).includes(kw)) {
+        sh.getRange(row, 1, 1, CFG.TOTAL_COLS).setBackground(colours.bg).setFontColor(colours.fg);
+        matched = true; break;
+      }
+    }
+    if (!matched) {
+      const bg = (row % 2 === 0) ? "#1A2332" : "#111827";
+      sh.getRange(row, 1, 1, CFG.TOTAL_COLS).setBackground(bg).setFontColor("#D1D5DB");
+    }
+  });
+  SpreadsheetApp.getActiveSpreadsheet().toast("Row colours refreshed.", "Done", 3);
+}
+
+function rebuildFormulas() {
+  const sh   = _getSheet();
+  const last = sh.getLastRow();
+  if (last < CFG.DATA_START) return;
+  for (let r = CFG.DATA_START; r <= last; r++) {
+    sh.getRange(r, C.VAT_QAR  ).setFormula(_vatFormula(r));
+    sh.getRange(r, C.TOTAL_QAR).setFormula(_totalFormula(r));
+    sh.getRange(r, C.WA_LINK  ).setFormula(_waFormula(r));
+  }
+  SpreadsheetApp.getActiveSpreadsheet().toast("Formulas rebuilt.", "Done", 3);
 }
 
 
-// ================================================================
-//  REBUILD WHATSAPP FORMULAS
-// ================================================================
-
-function rebuildWhatsAppFormulas() {
-  const ws = _getSheet(); if (!ws) return;
-  _buildWaFormulas(ws);
-  SpreadsheetApp.getUi().alert("✅  WhatsApp links rebuilt for all rows.");
-}
-
-
-// ================================================================
 // ──────────────────────────────────────────────────────────────
-//  ▼▼▼  v2.0: EMAIL ALERTS  ▼▼▼
+//  EMAIL — SINGLE ROW
 // ──────────────────────────────────────────────────────────────
-// ================================================================
-
-
-// ================================================================
-//  EMAIL UPDATE — selected row
-// ================================================================
-
 function emailCustomerUpdate() {
-  const ws = _getSheet(); if (!ws) return;
-  const ui = SpreadsheetApp.getUi();
+  const sh  = _getSheet();
+  const row = sh.getActiveRange().getRow();
+  if (row < CFG.DATA_START) { SpreadsheetApp.getUi().alert("Please select a data row first."); return; }
 
-  const row = ws.getActiveRange().getRow();
-  if (row < CFG.DATA_START) {
-    ui.alert("⚠️  Please click on a job data row first (row 4 or below).");
-    return;
-  }
+  const vals = sh.getRange(row, 1, 1, CFG.TOTAL_COLS).getValues()[0];
+  const email = vals[C.EMAIL - 1];
+  if (!_isValidEmail(email)) { SpreadsheetApp.getUi().alert("No valid email address in this row."); return; }
 
-  const v        = ws.getRange(row, 1, 1, CFG.TOTAL_COLS).getValues()[0];
-  const email    = String(v[C.EMAIL - 1]).trim();
-  const jobCard  = v[C.JOB_CARD - 1]  || "N/A";
-  const custName = v[C.CUST_NAME - 1] || "Customer";
-
-  if (!_isValidEmail(email)) {
-    ui.alert(
-      `⚠️  No valid email for this job.\n\n` +
-      `Job Card : ${jobCard}\n` +
-      `Customer : ${custName}\n\n` +
-      `Please add the customer email in Column U first.`
-    );
-    return;
-  }
-
-  const confirm = ui.alert(
-    "📧 Confirm Email Send",
-    `Send vehicle update email to:\n\n` +
-    `Customer : ${custName}\n` +
-    `Email    : ${email}\n` +
-    `Job Card : ${jobCard}\n\n` +
-    `Proceed?`,
-    ui.ButtonSet.YES_NO
-  );
-  if (confirm !== ui.Button.YES) return;
-
-  try {
-    const { subject, body, htmlBody } = _buildEmail(v);
-    MailApp.sendEmail({ to: email, subject, body, htmlBody });
-
-    ws.getRange(row, C.ALERT_SENT).setValue("YES");
-    ws.getRange(row, C.UPDATE_DATE)
-      .setValue(new Date()).setNumberFormat("DD-MMM-YYYY HH:mm");
-
-    ui.alert(
-      `✅  Email sent!\n\n` +
-      `To     : ${email}\n` +
-      `Job    : ${jobCard}\n` +
-      `Status : ${v[C.STATUS - 1]}`
-    );
-  } catch (err) {
-    ui.alert(`❌  Failed to send email.\n\nError: ${err.message}`);
-  }
+  MailApp.sendEmail({ to: email, subject: _buildEmail(vals).subject, htmlBody: _buildEmail(vals).html });
+  sh.getRange(row, C.ALERT_SENT).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm"));
+  SpreadsheetApp.getActiveSpreadsheet().toast(`Email sent to ${email}`, "Sent", 4);
 }
 
 
-// ================================================================
-//  EMAIL ALL ACTIVE JOBS  — every non-delivered, non-empty job
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
+//  EMAIL — BULK
+// ──────────────────────────────────────────────────────────────
 function emailAllActiveJobs() {
-  _bulkEmail(
-    row => row[C.JOB_CARD - 1] &&
-           row[C.STATUS - 1] !== "Delivered" &&
-           row[C.STATUS - 1] !== "",
-    "All Active Jobs"
-  );
+  _bulkEmail(["🔴 Open","🔵 In Progress","🔧 Body Shop","🔍 QC"]);
 }
-
-
-// ================================================================
-//  EMAIL READY-FOR-COLLECTION ALERTS
-// ================================================================
 
 function emailReadyAlerts() {
-  _bulkEmail(
-    row => row[C.JOB_CARD - 1] &&
-           row[C.READY - 1] === "YES" &&
-           row[C.STATUS - 1] !== "Delivered",
-    "Ready for Collection"
-  );
+  _bulkEmail(["🟢 Ready"]);
 }
 
-
-// ================================================================
-//  BULK EMAIL HELPER
-// ================================================================
-
-function _bulkEmail(filterFn, label) {
-  const ws = _getSheet(); if (!ws) return;
-  const ui = SpreadsheetApp.getUi();
-
-  const last = ws.getLastRow();
-  if (last < CFG.DATA_START) { ui.alert("No job data found."); return; }
-
-  const allData  = ws
-    .getRange(CFG.DATA_START, 1, last - CFG.DATA_START + 1, CFG.TOTAL_COLS)
-    .getValues();
-
-  const eligible = allData
-    .map((row, i) => ({ row, rowNum: CFG.DATA_START + i }))
-    .filter(({ row }) => filterFn(row) && _isValidEmail(row[C.EMAIL - 1]));
-
-  if (!eligible.length) {
-    ui.alert(
-      `⚠️  No eligible jobs found for "${label}".\n\n` +
-      `Make sure:\n` +
-      `• Customer email is filled in Column U\n` +
-      `• Jobs match the filter criteria`
-    );
-    return;
-  }
-
-  let preview =
-    `Found ${eligible.length} job(s) to email for "${label}":\n\n`;
-  eligible.slice(0, 10).forEach(({ row }, i) => {
-    preview +=
-      `${i + 1}. ${row[C.JOB_CARD - 1]}  |  ` +
-      `${row[C.CUST_NAME - 1]}  |  ${row[C.STATUS - 1]}\n` +
-      `   → ${row[C.EMAIL - 1]}\n`;
+function _bulkEmail(statusFilters) {
+  const sh   = _getSheet();
+  const last = sh.getLastRow();
+  if (last < CFG.DATA_START) return;
+  const data = sh.getRange(CFG.DATA_START, 1, last - CFG.DATA_START + 1, CFG.TOTAL_COLS).getValues();
+  let sent = 0, skipped = 0;
+  data.forEach((row, i) => {
+    const status = String(row[C.STATUS - 1]);
+    const email  = row[C.EMAIL - 1];
+    const match  = statusFilters.some(f => status.includes(f.replace(/^[^\s]+ /,"")));
+    if (!match || !_isValidEmail(email)) { skipped++; return; }
+    const built = _buildEmail(row);
+    MailApp.sendEmail({ to: email, subject: built.subject, htmlBody: built.html });
+    sh.getRange(CFG.DATA_START + i, C.ALERT_SENT)
+      .setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm"));
+    sent++;
   });
-  if (eligible.length > 10) {
-    preview += `   ...and ${eligible.length - 10} more\n`;
-  }
-  preview += `\nSend all ${eligible.length} email(s)?`;
-
-  if (ui.alert("📧 Bulk Email", preview, ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
-
-  let sent = 0, failed = 0, failedList = "";
-
-  eligible.forEach(({ row, rowNum }) => {
-    try {
-      const { subject, body, htmlBody } = _buildEmail(row);
-      MailApp.sendEmail({ to: row[C.EMAIL - 1], subject, body, htmlBody });
-      ws.getRange(rowNum, C.ALERT_SENT).setValue("YES");
-      ws.getRange(rowNum, C.UPDATE_DATE)
-        .setValue(new Date()).setNumberFormat("DD-MMM-YYYY HH:mm");
-      sent++;
-    } catch (err) {
-      failed++;
-      failedList += `\n  • ${row[C.JOB_CARD - 1]}  (${row[C.EMAIL - 1]})`;
-    }
-  });
-
-  let result = `📧 Bulk Email Complete\n\n✅ Sent    : ${sent}\n`;
-  if (failed) result += `❌ Failed  : ${failed}${failedList}`;
-  ui.alert(result);
+  SpreadsheetApp.getActiveSpreadsheet().toast(`Sent: ${sent}  |  Skipped: ${skipped}`, "Bulk Email Done", 5);
 }
 
 
-// ================================================================
-//  EMAIL BUILDER  — returns { subject, body, htmlBody }
-// ================================================================
+// ──────────────────────────────────────────────────────────────
+//  EMAIL TEMPLATE BUILDER
+// ──────────────────────────────────────────────────────────────
+function _buildEmail(row) {
+  const jobId    = row[C.JOB_ID     - 1] || "—";
+  const custName = row[C.CUST_NAME  - 1] || "Valued Customer";
+  const make     = row[C.MAKE       - 1] || "";
+  const model    = row[C.MODEL      - 1] || "";
+  const plate    = row[C.PLATE      - 1] || "";
+  const status   = row[C.STATUS     - 1] || "";
+  const workDone = row[C.WORK_DONE  - 1] || "—";
+  const parts    = row[C.PARTS_QAR  - 1] || 0;
+  const labour   = row[C.LABOUR_QAR - 1] || 0;
+  const disc     = row[C.DISCOUNT   - 1] || 0;
+  const vat      = row[C.VAT_QAR    - 1] || 0;
+  const total    = row[C.TOTAL_QAR  - 1] || 0;
+  const tech     = row[C.TECHNICIAN - 1] || "—";
 
-function _buildEmail(v) {
-  const jobCard  = v[C.JOB_CARD - 1]  || "N/A";
-  const custName = v[C.CUST_NAME - 1] || "Valued Customer";
-  const vehicle  = v[C.VEHICLE - 1]   || "N/A";
-  const plate    = v[C.PLATE - 1]     || "N/A";
-  const workDone = v[C.WORK_DONE - 1] || "In progress";
-  const parts    = v[C.PARTS - 1]     || "N/A";
-  const status   = v[C.STATUS - 1]    || "Not set";
-  const ready    = v[C.READY - 1]     || "Pending";
-  const remarks  = v[C.REMARKS - 1]   || "";
-  const garage   = CFG.GARAGE_NAME;
+  const statusLabel = String(status).replace(/^[^\s]+ /,"");
+  const subject = `[${jobId}] Vehicle Update — ${statusLabel} | Falcon Garage`;
 
-  const subject = `Vehicle Update – ${jobCard} | ${garage}`;
+  const html = `
+<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0F172A;font-family:Arial,sans-serif;">
+<table width="600" align="center" style="background:#1E293B;border-radius:10px;overflow:hidden;margin:20px auto;">
+  <tr><td style="background:#111827;padding:24px;text-align:center;">
+    <h1 style="color:#F59E0B;margin:0;font-size:22px;">🦅 Falcon Garage</h1>
+    <p style="color:#9CA3AF;margin:4px 0;font-size:12px;">ورشة فالكون | Doha, Qatar</p>
+  </td></tr>
+  <tr><td style="padding:24px;">
+    <p style="color:#E2E8F0;font-size:15px;">Dear <strong>${custName}</strong>,</p>
+    <p style="color:#9CA3AF;font-size:13px;">Here is an update for your vehicle currently at our workshop.</p>
+    <table width="100%" style="border-collapse:collapse;margin:16px 0;">
+      <tr style="background:#0D47A1;"><td colspan="2" style="padding:8px 12px;color:#fff;font-weight:bold;font-size:12px;">🔧 JOB DETAILS</td></tr>
+      <tr style="background:#1A2332;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;width:40%;">Job ID</td><td style="padding:8px 12px;color:#F59E0B;font-weight:bold;font-size:12px;">${jobId}</td></tr>
+      <tr style="background:#111827;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">Vehicle</td><td style="padding:8px 12px;color:#E2E8F0;font-size:12px;">${make} ${model} — ${plate}</td></tr>
+      <tr style="background:#1A2332;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">Status</td><td style="padding:8px 12px;color:#4ADE80;font-weight:bold;font-size:12px;">${status}</td></tr>
+      <tr style="background:#111827;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">Work Done</td><td style="padding:8px 12px;color:#E2E8F0;font-size:12px;">${workDone}</td></tr>
+      <tr style="background:#1A2332;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">Technician</td><td style="padding:8px 12px;color:#E2E8F0;font-size:12px;">${tech}</td></tr>
+    </table>
+    <table width="100%" style="border-collapse:collapse;margin:16px 0;">
+      <tr style="background:#065F46;"><td colspan="2" style="padding:8px 12px;color:#F59E0B;font-weight:bold;font-size:12px;">💰 FINANCIAL SUMMARY (QAR)</td></tr>
+      <tr style="background:#1A2332;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;width:40%;">Parts</td><td style="padding:8px 12px;color:#E2E8F0;font-size:12px;">${_fmtQAR(parts)}</td></tr>
+      <tr style="background:#111827;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">Labour</td><td style="padding:8px 12px;color:#E2E8F0;font-size:12px;">${_fmtQAR(labour)}</td></tr>
+      <tr style="background:#1A2332;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">Discount</td><td style="padding:8px 12px;color:#FCA5A5;font-size:12px;">- ${_fmtQAR(disc)}</td></tr>
+      <tr style="background:#111827;"><td style="padding:8px 12px;color:#9CA3AF;font-size:12px;">VAT (5%)</td><td style="padding:8px 12px;color:#E2E8F0;font-size:12px;">${_fmtQAR(vat)}</td></tr>
+      <tr style="background:#065F46;"><td style="padding:10px 12px;color:#F59E0B;font-weight:bold;font-size:13px;">TOTAL</td><td style="padding:10px 12px;color:#F59E0B;font-weight:bold;font-size:15px;">${_fmtQAR(total)}</td></tr>
+    </table>
+    <p style="color:#9CA3AF;font-size:11px;margin-top:20px;">For enquiries: <a href="tel:+97444862018" style="color:#F59E0B;">+974 4486 2018</a> | <a href="mailto:${CFG.GARAGE_EMAIL}" style="color:#F59E0B;">${CFG.GARAGE_EMAIL}</a></p>
+  </td></tr>
+  <tr><td style="background:#0F172A;padding:16px;text-align:center;">
+    <p style="color:#6B7280;font-size:10px;margin:0;">${CFG.GARAGE_NAME} | ${CFG.GARAGE_ADDR}</p>
+    <p style="color:#6B7280;font-size:10px;margin:4px 0;">${CFG.GARAGE_WEB}</p>
+  </td></tr>
+</table></body></html>`;
 
-  const body =
-    `Dear ${custName},\n\n` +
-    `Vehicle Update – ${garage}\n\n` +
-    `Job Card : ${jobCard}\n` +
-    `Vehicle  : ${vehicle}  |  Plate: ${plate}\n\n` +
-    `Work Completed:\n${workDone}\n\n` +
-    `Parts Changed:\n${parts}\n\n` +
-    `Current Status       : ${status}\n` +
-    `Ready for Collection : ${ready}\n\n` +
-    (remarks ? `Notes:\n${remarks}\n\n` : "") +
-    `Thank you for choosing ${garage}.\n` +
-    `For queries, please reply to this email or call us directly.\n\n` +
-    `Best regards,\n${garage} Service Team`;
-
-  const statusColour = ({
-    "Vehicle Received":         "#1A5276",
-    "Diagnosis Started":        "#1A5276",
-    "Waiting Customer Approval":"#922B21",
-    "Parts Ordered":            "#784212",
-    "Repair In Progress":       "#1A5276",
-    "Additional Work Required": "#784212",
-    "Work Finished":            "#1D6A39",
-    "Ready for Collection":     "#1D6A39",
-    "Delivered":                "#5D6D7E",
-  })[status] || "#333";
-
-  const readyBadge = ready === "YES"
-    ? `<span style="background:#D5F5E3;color:#1D6A39;padding:3px 12px;` +
-      `border-radius:12px;font-weight:bold;">&#10003; YES — Ready for Collection</span>`
-    : `<span style="background:#FAE5D3;color:#784212;padding:3px 12px;` +
-      `border-radius:12px;font-weight:bold;">&#8987; Not Yet Ready</span>`;
-
-  const htmlBody = `
-<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:24px 0;">
-<tr><td align="center">
-<table width="620" cellpadding="0" cellspacing="0"
-       style="background:#fff;border-radius:8px;overflow:hidden;
-              box-shadow:0 2px 8px rgba(0,0,0,.12);">
-
-  <tr>
-    <td style="background:#0D2137;padding:28px 32px;text-align:center;">
-      <p style="margin:0;color:#fff;font-size:22px;font-weight:bold;letter-spacing:1px;">
-        &#128296; ${garage}
-      </p>
-      <p style="margin:6px 0 0;color:#AACCEE;font-size:13px;">Vehicle Service Update</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:28px 32px 0;">
-      <p style="margin:0;font-size:15px;color:#333;">
-        Dear <strong>${custName}</strong>,
-      </p>
-      <p style="margin:10px 0 0;font-size:14px;color:#555;">
-        Here is the latest update on your vehicle currently in our care.
-      </p>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:20px 32px 0;">
-      <table width="100%" cellpadding="10" cellspacing="0"
-             style="background:#F0F7FF;border-radius:6px;border:1px solid #D0E8FA;">
-        <tr>
-          <td width="50%" style="font-size:13px;color:#555;">
-            <strong style="color:#1A3A5C;">Job Card No</strong><br>${jobCard}
-          </td>
-          <td width="50%" style="font-size:13px;color:#555;">
-            <strong style="color:#1A3A5C;">Vehicle</strong><br>${vehicle}
-          </td>
-        </tr>
-        <tr>
-          <td style="font-size:13px;color:#555;">
-            <strong style="color:#1A3A5C;">Plate Number</strong><br>${plate}
-          </td>
-          <td style="font-size:13px;color:#555;">
-            <strong style="color:#1A3A5C;">Current Status</strong><br>
-            <span style="color:${statusColour};font-weight:bold;">${status}</span>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:20px 32px 0;">
-      <p style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#1A3A5C;
-                border-bottom:2px solid #2E86AB;padding-bottom:4px;">
-        &#128296; Work Completed
-      </p>
-      <p style="margin:8px 0 0;font-size:13px;color:#333;line-height:1.7;">
-        ${workDone.replace(/\n/g, "<br>")}
-      </p>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:16px 32px 0;">
-      <p style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#1A3A5C;
-                border-bottom:2px solid #2E86AB;padding-bottom:4px;">
-        &#128297; Parts Changed / Replaced
-      </p>
-      <p style="margin:8px 0 0;font-size:13px;color:#333;line-height:1.7;">
-        ${parts.replace(/\n/g, "<br>")}
-      </p>
-    </td>
-  </tr>
-
-  ${remarks ? `
-  <tr>
-    <td style="padding:16px 32px 0;">
-      <p style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#1A3A5C;
-                border-bottom:2px solid #2E86AB;padding-bottom:4px;">
-        &#128221; Additional Notes
-      </p>
-      <p style="margin:8px 0 0;font-size:13px;color:#333;line-height:1.7;">
-        ${remarks.replace(/\n/g, "<br>")}
-      </p>
-    </td>
-  </tr>` : ""}
-
-  <tr>
-    <td style="padding:20px 32px;">
-      <table width="100%" cellpadding="18" cellspacing="0"
-             style="background:#F8F8F8;border-radius:6px;border:1px solid #DDD;
-                    text-align:center;">
-        <tr>
-          <td>
-            <p style="margin:0 0 10px;font-size:11px;font-weight:bold;color:#777;
-                      text-transform:uppercase;letter-spacing:1px;">
-              Collection Status
-            </p>
-            ${readyBadge}
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="background:#0D2137;padding:20px 32px;text-align:center;">
-      <p style="margin:0;color:#AACCEE;font-size:12px;line-height:1.6;">
-        Thank you for choosing
-        <strong style="color:#fff;">${garage}</strong>.<br>
-        For queries, please reply to this email or call us directly.
-      </p>
-    </td>
-  </tr>
-
-</table>
-</td></tr></table>
-</body></html>`;
-
-  return { subject, body, htmlBody };
+  return { subject, html };
 }
 
 
-// ================================================================
 // ──────────────────────────────────────────────────────────────
-//  ▼▼▼  v2.0: MONTHLY PDF SUMMARY  ▼▼▼
+//  MONTHLY PDF
 // ──────────────────────────────────────────────────────────────
-// ================================================================
-
-
-// ================================================================
-//  GENERATE MONTHLY PDF  — menu entry point
-// ================================================================
-
 function generateMonthlyPDF() {
-  const ui    = SpreadsheetApp.getUi();
-  const today = new Date();
-
-  // Step 1 — month
-  const mRes = ui.prompt(
-    "📄 Monthly PDF Summary  (Step 1 of 3)",
-    "Enter the MONTH number (1–12):\n\n" +
-    "  1=Jan  2=Feb  3=Mar  4=Apr  5=May  6=Jun\n" +
-    "  7=Jul  8=Aug  9=Sep  10=Oct  11=Nov  12=Dec\n\n" +
-    `Default: ${today.getMonth() + 1}`,
+  const ui   = SpreadsheetApp.getUi();
+  const resp = ui.prompt(
+    "📄 Monthly PDF",
+    "Enter month & year (e.g. May 2026)  — leave blank for current month:",
     ui.ButtonSet.OK_CANCEL
   );
-  if (mRes.getSelectedButton() !== ui.Button.OK) return;
-  const month = parseInt(mRes.getResponseText().trim()) || today.getMonth() + 1;
-  if (month < 1 || month > 12) { ui.alert("⚠️  Invalid month. Enter 1–12."); return; }
-
-  // Step 2 — year
-  const yRes = ui.prompt(
-    "📄 Monthly PDF Summary  (Step 2 of 3)",
-    `Enter the YEAR:\n\nDefault: ${today.getFullYear()}`,
-    ui.ButtonSet.OK_CANCEL
-  );
-  if (yRes.getSelectedButton() !== ui.Button.OK) return;
-  const year = parseInt(yRes.getResponseText().trim()) || today.getFullYear();
-
-  // Step 3 — optional email recipient
-  const eRes = ui.prompt(
-    "📄 Monthly PDF Summary  (Step 3 of 3)",
-    "Email the PDF to (optional):\n\n" +
-    "Enter an email address to receive the report.\n" +
-    "Leave blank to save to Google Drive only.",
-    ui.ButtonSet.OK_CANCEL
-  );
-  if (eRes.getSelectedButton() !== ui.Button.OK) return;
-  const destEmail = eRes.getResponseText().trim();
-
-  ui.alert(
-    "⏳  Generating PDF — please wait...\n\n" +
-    `Month : ${_monthName(month)} ${year}\n` +
-    `Email : ${destEmail || "(Drive only)"}\n\n` +
-    "This may take 15–30 seconds. Click OK to start."
-  );
-
-  _runMonthlyPDF(month, year, destEmail);
+  if (resp.getSelectedButton() !== ui.Button.OK) return;
+  const input = resp.getResponseText().trim();
+  _runMonthlyPDF(input);
 }
 
+function _runMonthlyPDF(monthInput) {
+  const now    = new Date();
+  let   target = now;
+  if (monthInput) {
+    const parts = monthInput.split(/\s+/);
+    if (parts.length === 2) {
+      const m = ["january","february","march","april","may","june","july","august","september","october","november","december"]
+        .indexOf(parts[0].toLowerCase());
+      if (m !== -1) target = new Date(parseInt(parts[1]), m, 1);
+    }
+  }
+  const month = target.getMonth();
+  const year  = target.getFullYear();
 
-// ================================================================
-//  PDF CORE LOGIC
-// ================================================================
+  const sh    = _getSheet();
+  const last  = sh.getLastRow();
+  if (last < CFG.DATA_START) { SpreadsheetApp.getUi().alert("No job data found."); return; }
 
-function _runMonthlyPDF(month, year, destEmail) {
-  const ui = SpreadsheetApp.getUi();
-  const ws = _getSheet(); if (!ws) return;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-  const last = ws.getLastRow();
-  if (last < CFG.DATA_START) { ui.alert("No job data found."); return; }
-
-  // Filter jobs whose Date Opened falls in month/year
-  const allRows = ws
-    .getRange(CFG.DATA_START, 1, last - CFG.DATA_START + 1, CFG.TOTAL_COLS)
-    .getValues();
-
-  const jobs = allRows.filter(row => {
-    if (!row[C.JOB_CARD - 1]) return false;
-    const d = new Date(row[C.DATE_OPENED - 1]);
-    return !isNaN(d) && d.getMonth() + 1 === month && d.getFullYear() === year;
+  const data = sh.getRange(CFG.DATA_START, 1, last - CFG.DATA_START + 1, CFG.TOTAL_COLS).getValues();
+  const filtered = data.filter(row => {
+    const di = row[C.DATE_IN - 1];
+    if (!di) return false;
+    const parts = String(di).split("/");
+    if (parts.length !== 3) return false;
+    const d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    return d.getMonth() === month && d.getFullYear() === year;
   });
 
-  if (!jobs.length) {
-    ui.alert(
-      `⚠️  No jobs found for ${_monthName(month)} ${year}.\n\n` +
-      `Ensure jobs have a "Date Opened" (Column B) in that month.`
-    );
+  if (!filtered.length) {
+    SpreadsheetApp.getUi().alert(`No jobs found for ${_monthName(month)} ${year}.`);
     return;
   }
 
-  // Build temp summary sheet
-  const tmpName = `_PDF_TMP_${Date.now()}`;
-  let tmpWs = ss.insertSheet(tmpName);
+  // Build stats
+  const totalRevenue = filtered.reduce((s, r) => s + (parseFloat(r[C.TOTAL_QAR - 1]) || 0), 0);
+  const totalVAT     = filtered.reduce((s, r) => s + (parseFloat(r[C.VAT_QAR   - 1]) || 0), 0);
+  const statusBreak  = {};
+  filtered.forEach(r => {
+    const k = String(r[C.STATUS - 1]).replace(/^[^\s]+ /,"");
+    statusBreak[k] = (statusBreak[k] || 0) + 1;
+  });
 
+  const ss     = SpreadsheetApp.getActiveSpreadsheet();
+  const tmpName= `PDF_TEMP_${Date.now()}`;
+  const tmp    = ss.insertSheet(tmpName);
   try {
-    _buildPDFSheet(tmpWs, jobs, month, year);
-    SpreadsheetApp.flush();
-
-    const filename =
-      `Falcon_Garage_Summary_${_monthName(month)}_${year}.pdf`;
-    const pdfBlob = _exportSheetAsPDF(ss.getId(), tmpWs.getSheetId(), filename);
-
-    // Save to Drive
-    const folder   = _getOrCreateDriveFolder("Falcon Garage Reports");
-    const driveFile = folder.createFile(pdfBlob);
-
-    // Email if requested
-    if (destEmail && _isValidEmail(destEmail)) {
-      MailApp.sendEmail({
-        to:          destEmail,
-        subject:     `${CFG.GARAGE_NAME} — Monthly Summary: ${_monthName(month)} ${year}`,
-        body:
-          `Please find attached the monthly job summary for ` +
-          `${_monthName(month)} ${year}.\n\n` +
-          `Total Jobs : ${jobs.length}\n` +
-          `Generated  : ${new Date().toLocaleString()}\n\n` +
-          `Google Drive: ${driveFile.getUrl()}\n\n` +
-          `— ${CFG.GARAGE_NAME} Job Tracker`,
-        attachments: [pdfBlob],
-      });
-    }
-
-    ui.alert(
-      `✅  PDF Summary Generated!\n\n` +
-      `Month       : ${_monthName(month)} ${year}\n` +
-      `Total Jobs  : ${jobs.length}\n` +
-      `Saved to    : Google Drive → "Falcon Garage Reports"\n` +
-      (destEmail && _isValidEmail(destEmail)
-        ? `Emailed to  : ${destEmail}\n` : "") +
-      `\nFile: ${filename}`
+    _buildPDFSheet(tmp, filtered, month, year, totalRevenue, totalVAT, statusBreak);
+    const blob = _exportSheetAsPDF(ss, tmp);
+    const folder = _getOrCreateDriveFolder("Falcon Garage / Monthly Reports");
+    const file = folder.createFile(blob.setName(`Falcon_Garage_${_monthName(month)}_${year}.pdf`));
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      `✅ PDF saved: ${file.getName()} | Jobs: ${filtered.length} | Revenue: QAR ${_fmtQAR(totalRevenue)}`,
+      "PDF Generated", 8
     );
   } finally {
-    ss.deleteSheet(tmpWs);
+    ss.deleteSheet(tmp);
   }
 }
 
+function _buildPDFSheet(sh, rows, month, year, revenue, vat, statusBreak) {
+  let r = 1;
 
-// ================================================================
-//  BUILD THE PDF SUMMARY SHEET
-// ================================================================
+  // Title
+  sh.getRange(r, 1, 1, 9).merge()
+    .setValue(`🦅 FALCON GARAGE — Monthly Job Report — ${_monthName(month)} ${year}`)
+    .setBackground("#111827").setFontColor("#F59E0B")
+    .setFontSize(16).setFontWeight("bold").setHorizontalAlignment("center");
+  sh.setRowHeight(r, 40); r++;
 
-function _buildPDFSheet(ws, jobs, month, year) {
-  const garage = CFG.GARAGE_NAME;
-  const tz     = Session.getScriptTimeZone();
-  const genStr = Utilities.formatDate(new Date(), tz, "dd MMM yyyy, HH:mm");
+  sh.getRange(r, 1, 1, 9).merge()
+    .setValue(`${CFG.GARAGE_ADDR}  |  ${CFG.GARAGE_TEL}  |  ${CFG.GARAGE_WEB}`)
+    .setBackground("#1F2937").setFontColor("#9CA3AF")
+    .setFontSize(9).setHorizontalAlignment("center");
+  sh.setRowHeight(r, 22); r += 2;
 
-  // Stats
-  const total     = jobs.length;
-  const delivered = jobs.filter(r => r[C.STATUS - 1] === "Delivered").length;
-  const readyNow  = jobs.filter(
-    r => r[C.READY - 1] === "YES" && r[C.STATUS - 1] !== "Delivered"
-  ).length;
-  const active    = total - delivered - readyNow;
-
-  const statusCount = {};
-  STATUS_LIST.forEach(s => { statusCount[s] = 0; });
-  jobs.forEach(r => {
-    const s = r[C.STATUS - 1];
-    if (s in statusCount) statusCount[s]++;
+  // Stats row
+  [
+    ["Total Jobs", rows.length, "#0D47A1"],
+    ["Total Revenue (QAR)", _fmtQAR(revenue), "#065F46"],
+    ["Total VAT (QAR)", _fmtQAR(vat), "#374151"],
+  ].forEach(([lbl, val, bg], i) => {
+    const col = i * 3 + 1;
+    sh.getRange(r,   col, 1, 3).merge().setValue(lbl).setBackground(bg).setFontColor("#9CA3AF").setFontSize(10).setHorizontalAlignment("center");
+    sh.getRange(r+1, col, 1, 3).merge().setValue(val).setBackground(bg).setFontColor("#F59E0B").setFontSize(14).setFontWeight("bold").setHorizontalAlignment("center");
   });
+  r += 3;
 
-  // ── Column widths for 10-column table ──────────────────────────
-  [115, 95, 150, 175, 105, 205, 175, 175, 65, 130]
-    .forEach((w, i) => ws.setColumnWidth(i + 1, w));
+  // Status breakdown
+  const sbLine = Object.entries(statusBreak).map(([k,v]) => `${k}: ${v}`).join("   |   ");
+  sh.getRange(r, 1, 1, 9).merge().setValue(`Status Breakdown: ${sbLine}`)
+    .setBackground("#1A2332").setFontColor("#D1D5DB").setFontSize(9).setHorizontalAlignment("center");
+  r += 2;
 
-  // ── Row 1: Title ───────────────────────────────────────────────
-  ws.setRowHeight(1, 50);
-  ws.getRange(1, 1, 1, 10).merge()
-    .setValue(`${garage}  —  Monthly Job Summary`)
-    .setBackground(P.TITLE_BG)
-    .setFontColor(P.WHITE)
-    .setFontSize(18).setFontWeight("bold").setFontFamily("Arial")
-    .setHorizontalAlignment("center").setVerticalAlignment("middle");
-
-  // ── Row 2: Subtitle ────────────────────────────────────────────
-  ws.setRowHeight(2, 26);
-  ws.getRange(2, 1, 1, 10).merge()
-    .setValue(`${_monthName(month)} ${year}   |   Generated: ${genStr}`)
-    .setBackground(P.HEADER_BG)
-    .setFontColor("#AACCEE")
-    .setFontSize(10).setFontStyle("italic").setFontFamily("Arial")
-    .setHorizontalAlignment("center").setVerticalAlignment("middle");
-
-  // ── Row 3: Spacer ──────────────────────────────────────────────
-  ws.setRowHeight(3, 8);
-
-  // ── Rows 4–5: Stat boxes (4 boxes × 2 cols = 8; cols 9–10 blank) ──
-  const statBoxes = [
-    { label: "Total Jobs",           value: total,     bg: P.BLU_BG, fg: P.BLU_FG, col: 1 },
-    { label: "Active / In Progress", value: active,    bg: P.ORG_BG, fg: P.ORG_FG, col: 3 },
-    { label: "Ready for Collection", value: readyNow,  bg: P.GRN_BG, fg: P.GRN_FG, col: 5 },
-    { label: "Delivered / Closed",   value: delivered, bg: P.GRY_BG, fg: P.GRY_FG, col: 7 },
-  ];
-  [4, 5].forEach(r => ws.setRowHeight(r, r === 4 ? 38 : 26));
-
-  statBoxes.forEach(({ label, value, bg, fg, col }) => {
-    ws.getRange(4, col, 1, 2).merge()
-      .setValue(value)
-      .setBackground(bg).setFontColor(fg)
-      .setFontSize(24).setFontWeight("bold").setFontFamily("Arial")
-      .setHorizontalAlignment("center").setVerticalAlignment("middle");
-    ws.getRange(5, col, 1, 2).merge()
-      .setValue(label)
-      .setBackground(bg).setFontColor(fg)
-      .setFontSize(9).setFontFamily("Arial")
-      .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  // Table headers
+  const hdrs = ["Job ID","Date In","Customer","Plate","Make / Model","Status","Work Done","Total (QAR)","Tech"];
+  hdrs.forEach((h, i) => {
+    sh.getRange(r, i + 1).setValue(h)
+      .setBackground("#0F172A").setFontColor("#E2E8F0")
+      .setFontSize(8).setFontWeight("bold").setHorizontalAlignment("center");
   });
+  r++;
 
-  // ── Row 6: Spacer ──────────────────────────────────────────────
-  ws.setRowHeight(6, 8);
-
-  // ── Row 7: Status breakdown label ─────────────────────────────
-  ws.setRowHeight(7, 24);
-  ws.getRange(7, 1, 1, 10).merge()
-    .setValue("STATUS BREAKDOWN")
-    .setBackground(P.HEADER_BG).setFontColor(P.WHITE)
-    .setFontSize(10).setFontWeight("bold").setFontFamily("Arial")
-    .setHorizontalAlignment("center").setVerticalAlignment("middle");
-
-  // ── Rows 8–9: Status counts (5 per row) ───────────────────────
-  const sKeys  = Object.keys(statusCount);
-  const rowA   = sKeys.slice(0, 5);
-  const rowB   = sKeys.slice(5);
-  [rowA, rowB].forEach((group, gi) => {
-    ws.setRowHeight(8 + gi, 24);
-    group.forEach((status, j) => {
-      ws.getRange(8 + gi, j * 2 + 1, 1, 2).merge()
-        .setValue(`${status}: ${statusCount[status]}`)
-        .setBackground("#F5F5F5").setFontColor("#333333")
-        .setFontSize(9).setFontFamily("Arial")
-        .setHorizontalAlignment("center").setVerticalAlignment("middle")
-        .setBorder(true, true, true, true, null, null,
-                   "#DDDDDD", SpreadsheetApp.BorderStyle.SOLID);
+  // Data rows
+  rows.forEach((row, idx) => {
+    const bg = idx % 2 === 0 ? "#1A2332" : "#111827";
+    const cells = [
+      row[C.JOB_ID    - 1],
+      row[C.DATE_IN   - 1],
+      row[C.CUST_NAME - 1],
+      row[C.PLATE     - 1],
+      `${row[C.MAKE-1]} ${row[C.MODEL-1]}`,
+      String(row[C.STATUS - 1]).replace(/^[^\s]+ /,""),
+      row[C.WORK_DONE - 1],
+      _fmtQAR(parseFloat(row[C.TOTAL_QAR - 1]) || 0),
+      row[C.TECHNICIAN- 1],
+    ];
+    cells.forEach((v, i) => {
+      sh.getRange(r, i + 1).setValue(v)
+        .setBackground(bg).setFontColor("#D1D5DB").setFontSize(8).setWrap(true);
     });
+    r++;
   });
 
-  // ── Row 10: Spacer ─────────────────────────────────────────────
-  ws.setRowHeight(10, 8);
-
-  // ── Row 11: Table header ───────────────────────────────────────
-  const tblHdr = [
-    "Job Card No", "Date Opened", "Customer Name",
-    "Vehicle", "Plate No", "Work Done (Summary)",
-    "Parts Changed", "Status", "Ready", "Technician",
-  ];
-  ws.setRowHeight(11, 30);
-  ws.getRange(11, 1, 1, 10)
-    .setValues([tblHdr])
-    .setBackground(P.BAND_BG).setFontColor(P.WHITE)
-    .setFontSize(9).setFontWeight("bold").setFontFamily("Arial")
-    .setHorizontalAlignment("center").setVerticalAlignment("middle")
-    .setWrap(true);
-
-  // ── Rows 12+: Job data ─────────────────────────────────────────
-  const truncate = (s, n) =>
-    String(s).length > n ? String(s).slice(0, n) + "…" : String(s);
-
-  const tblData = jobs.map(r => [
-    r[C.JOB_CARD - 1],
-    r[C.DATE_OPENED - 1],
-    r[C.CUST_NAME - 1],
-    r[C.VEHICLE - 1],
-    r[C.PLATE - 1],
-    truncate(r[C.WORK_DONE - 1], 120),
-    truncate(r[C.PARTS - 1],     100),
-    r[C.STATUS - 1],
-    r[C.READY - 1],
-    r[C.TECHNICIAN - 1],
-  ]);
-
-  const DATA_ROW = 12;
-  ws.getRange(DATA_ROW, 1, tblData.length, 10).setValues(tblData);
-
-  tblData.forEach((_, i) => {
-    const r  = DATA_ROW + i;
-    const bg = i % 2 === 0 ? "#F0F7FF" : "#FFFFFF";
-    ws.setRowHeight(r, 20);
-    ws.getRange(r, 1, 1, 10)
-      .setBackground(bg).setFontFamily("Arial").setFontSize(9)
-      .setVerticalAlignment("middle")
-      .setBorder(true, true, true, true, true, true,
-                 "#DDDDDD", SpreadsheetApp.BorderStyle.SOLID);
-    ws.getRange(r, 2).setNumberFormat("DD-MMM-YYYY");
-    ws.getRange(r, 1).setFontWeight("bold").setFontColor(P.ACCENT);
-    ws.getRange(r, 8).setFontWeight("bold");
-    ws.getRange(r, 9).setHorizontalAlignment("center");
-  });
-
-  // Conditional colours on Status column (col 8) in the table
-  if (tblData.length > 0) {
-    const statusRange = ws.getRange(DATA_ROW, 8, tblData.length, 1);
-    ws.setConditionalFormatRules([
-      { status: "Waiting Customer Approval", bg: P.RED_BG },
-      { status: "Parts Ordered",             bg: P.ORG_BG },
-      { status: "Additional Work Required",  bg: P.ORG_BG },
-      { status: "Repair In Progress",        bg: P.BLU_BG },
-      { status: "Work Finished",             bg: P.GRN_BG },
-      { status: "Ready for Collection",      bg: P.GRN_BG },
-      { status: "Delivered",                 bg: P.GRY_BG },
-    ].map(({ status, bg }) =>
-      SpreadsheetApp.newConditionalFormatRule()
-        .whenTextEqualTo(status)
-        .setBackground(bg)
-        .setRanges([statusRange])
-        .build()
-    ));
-  }
-
-  // ── Footer ─────────────────────────────────────────────────────
-  const footerRow = DATA_ROW + tblData.length + 1;
-  ws.setRowHeight(footerRow, 22);
-  ws.getRange(footerRow, 1, 1, 10).merge()
-    .setValue(
-      `${garage}  |  Confidential — Internal Use Only  |  ` +
-      `${_monthName(month)} ${year} Summary`
-    )
-    .setBackground(P.TITLE_BG).setFontColor("#AACCEE")
-    .setFontSize(9).setFontStyle("italic").setFontFamily("Arial")
-    .setHorizontalAlignment("center").setVerticalAlignment("middle");
+  // Column widths
+  [120,80,130,80,110,90,200,90,90].forEach((w, i) => sh.setColumnWidth(i + 1, w));
 }
 
-
-// ================================================================
-//  EXPORT SHEET AS PDF  — returns a Blob
-// ================================================================
-
-function _exportSheetAsPDF(spreadsheetId, sheetGid, filename) {
+function _exportSheetAsPDF(ss, targetSheet) {
+  const ssId  = ss.getId();
+  const shId  = targetSheet.getSheetId();
+  const url   = `https://docs.google.com/spreadsheets/d/${ssId}/export`
+    + `?format=pdf&size=A4&portrait=false&fitw=true&sheetnames=false`
+    + `&printtitle=false&pagenumbers=false&gridlines=false`
+    + `&fzr=false&gid=${shId}`;
   const token = ScriptApp.getOAuthToken();
-  const url =
-    `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export` +
-    `?exportFormat=pdf&format=pdf` +
-    `&size=A4&portrait=false` +
-    `&fitw=true&sheetnames=false&printtitle=false` +
-    `&pagenumbers=true&gridlines=false&fzr=false` +
-    `&gid=${sheetGid}`;
+  const resp  = UrlFetchApp.fetch(url, { headers: { Authorization: `Bearer ${token}` }, muteHttpExceptions: true });
+  return resp.getBlob();
+}
 
-  const resp = UrlFetchApp.fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-    muteHttpExceptions: true,
+function _getOrCreateDriveFolder(path) {
+  const parts = path.split("/").map(s => s.trim());
+  let folder  = DriveApp.getRootFolder();
+  parts.forEach(name => {
+    const it = folder.getFoldersByName(name);
+    folder = it.hasNext() ? it.next() : folder.createFolder(name);
   });
-
-  if (resp.getResponseCode() !== 200) {
-    throw new Error(
-      `PDF export failed (HTTP ${resp.getResponseCode()}). ` +
-      `Check that the script has Drive access.`
-    );
-  }
-
-  return resp.getBlob().setName(filename);
+  return folder;
 }
 
 
-// ================================================================
-//  GOOGLE DRIVE FOLDER HELPER
-// ================================================================
-
-function _getOrCreateDriveFolder(name) {
-  const iter = DriveApp.getFoldersByName(name);
-  return iter.hasNext() ? iter.next() : DriveApp.createFolder(name);
-}
-
-
-// ================================================================
-//  UTILITY HELPERS
-// ================================================================
-
+// ──────────────────────────────────────────────────────────────
+//  UTILITIES
+// ──────────────────────────────────────────────────────────────
 function _getSheet() {
-  const ws = SpreadsheetApp.getActiveSpreadsheet()
-               .getSheetByName(CFG.SHEET_NAME);
-  if (!ws) {
-    SpreadsheetApp.getUi().alert(
-      "Sheet not found.\n" +
-      "Run  🔧 Falcon Garage → ⚙️ Setup Sheet (First Time Only)  first."
-    );
-  }
-  return ws;
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(CFG.SHEET_NAME);
+  if (!sh) throw new Error(`Sheet "${CFG.SHEET_NAME}" not found. Run Setup first.`);
+  return sh;
 }
 
-function _isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+function _isValidEmail(e) {
+  return typeof e === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
 }
 
 function _monthName(m) {
-  return [
-    "", "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December",
-  ][m];
+  return ["January","February","March","April","May","June","July","August","September","October","November","December"][m];
 }
 
-function _colLetter(col) {
-  let result = "";
-  let n = col;
-  while (n > 0) {
-    n--;
-    result = String.fromCharCode(65 + (n % 26)) + result;
-    n = Math.floor(n / 26);
-  }
-  return result;
+function _colLetter(n) {
+  let s = "";
+  while (n > 0) { s = String.fromCharCode(64 + (n - 1) % 26 + 1) + s; n = Math.floor((n - 1) / 26); }
+  return s;
+}
+
+function _fmtQAR(v) {
+  return "QAR " + Number(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

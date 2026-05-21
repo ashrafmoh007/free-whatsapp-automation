@@ -1,430 +1,387 @@
 #!/usr/bin/env python3
 """
-Generates Falcon_Garage_Job_Tracker.xlsx
+Generates Falcon_Garage_Job_Tracker.xlsx  (v3.0 — 34 columns A-AH)
 Upload to Google Sheets, then paste Falcon_Garage_Tracker.gs
 into Extensions → Apps Script to activate full automation.
 """
 
 import datetime
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
+from openpyxl.styles import (
+    Font, PatternFill, Border, Side, Alignment, GradientFill
+)
+from openpyxl.styles.differential import DifferentialStyle
+from openpyxl.formatting.rule import Rule
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
-from openpyxl.formatting.rule import Rule
-from openpyxl.styles.differential import DifferentialStyle
 
-OUTPUT = "/home/user/free-whatsapp-automation/Falcon_Garage_Job_Tracker.xlsx"
+# ──────────────────────────────────────────────────────────────
+# CONFIG
+# ──────────────────────────────────────────────────────────────
+SHEET_NAME  = "JOB UPDATE TRACKER"
+TITLE_ROW   = 1
+SUB_ROW     = 2
+GROUP_ROW   = 3
+HEADER_ROW  = 4
+DATA_START  = 5
+TOTAL_COLS  = 34
 
-# ── Palette ────────────────────────────────────────────────────────────────
-TITLE_BG   = "0D2137"
-HEADER_BG  = "1A3A5C"
-BAND_BG    = "2E86AB"
-WHITE      = "FFFFFF"
-ROW_A      = "F0F7FF"
-ROW_B      = "FFFFFF"
-BORDER_C   = "BDC3C7"
-ACCENT     = "1A6FAE"
-LINK_C     = "1D6A39"
+GARAGE_NAME  = "Falcon Garage"
+GARAGE_AR    = "ورشة فالكون"
+GARAGE_TEL   = "+974 4486 2018 | 7072 5811 | 7003 3723 | 7731 8043"
+GARAGE_WEB   = "www.falqatar.com"
+GARAGE_EMAIL = "info@falqatar.com"
+GARAGE_ADDR  = "Street 47, Bldg 190, Zone 57, Industrial Area, Doha - Qatar"
 
-RED_BG, RED_FG     = "FADBD8", "7B241C"
-ORG_BG, ORG_FG     = "FAE5D3", "784212"
-BLU_BG, BLU_FG     = "D6EAF8", "1A5276"
-GRN_BG, GRN_FG     = "D5F5E3", "1D6A39"
-GRY_BG, GRY_FG     = "EAECEE", "5D6D7E"
+# Column index map (0-based for list access, 1-based for openpyxl)
+C = dict(
+    JOB_ID=1, DATE_IN=2, TIME_IN=3,
+    STATUS=4, PRIORITY=5, JOB_TYPE=6, TECHNICIAN=7,
+    CUST_NAME=8, PHONE=9, EMAIL=10, CUST_ID=11,
+    PLATE=12, MAKE=13, MODEL=14, YEAR=15, VIN=16, ODOMETER=17, VEH_TYPE=18,
+    COMPLAINT=19, WORK_DONE=20, PARTS_USED=21,
+    PARTS_QAR=22, LABOUR_QAR=23, DISCOUNT=24, VAT_QAR=25, TOTAL_QAR=26,
+    PAYMENT=27, PAY_STATUS=28,
+    EST_REF=29, INV_REF=30, DATE_OUT=31, APPROVED_BY=32,
+    WA_LINK=33, ALERT_SENT=34,
+)
 
-def fill(hex_c):
-    return PatternFill(start_color=hex_c, end_color=hex_c, fill_type="solid")
+HEADERS = [
+    "Job ID","Date In","Time In",
+    "Status","Priority","Job Type","Technician",
+    "Customer Name","Phone","Email","Customer ID",
+    "Plate No.","Make","Model","Year","VIN","Odometer","Veh Type",
+    "Complaint / Fault","Work Done","Parts Used",
+    "Parts (QAR)","Labour (QAR)","Discount (QAR)","VAT (QAR)","Total (QAR)",
+    "Payment Method","Pay Status",
+    "Estimate Ref","Invoice Ref","Date Out","Approved By",
+    "WhatsApp","Alert Sent",
+]
 
-def font(bold=False, color=None, size=10, italic=False, underline=None):
-    kw = dict(name="Arial", size=size, bold=bold, italic=italic)
-    if color:   kw["color"] = color
-    if underline: kw["underline"] = underline
-    return Font(**kw)
+GROUPS = [
+    dict(label="🔧  JOB INFORMATION",            s=1,  e=7,  bg="1C2839", fg="F59E0B"),
+    dict(label="👤  CUSTOMER  · العميل",          s=8,  e=11, bg="0D47A1", fg="FFFFFF"),
+    dict(label="🚗  VEHICLE  · المركبة",          s=12, e=18, bg="0891B2", fg="FFFFFF"),
+    dict(label="🔧  COMPLAINT & WORK · الشكوى",  s=19, e=21, bg="7C3AED", fg="FFFFFF"),
+    dict(label="💰  FINANCIALS · المالية (QAR)", s=22, e=28, bg="065F46", fg="F59E0B"),
+    dict(label="📋  ADMIN",                       s=29, e=32, bg="374151", fg="FFFFFF"),
+    dict(label="📱  COMMUNICATION",               s=33, e=34, bg="166534", fg="FFFFFF"),
+]
 
-def border(color=BORDER_C, style="thin"):
-    s = Side(style=style, color=color)
+COL_WIDTHS = {
+    1:13, 2:11, 3:8,  4:14, 5:12, 6:14, 7:13,
+    8:17, 9:15, 10:20,11:12,
+    12:11,13:11,14:11,15:7, 16:18,17:10,18:10,
+    19:28,20:28,21:22,
+    22:12,23:12,24:10,25:10,26:12,27:14,28:12,
+    29:12,30:12,31:11,32:13,
+    33:17,34:12,
+}
+
+STATUS_COLOURS = {
+    "Open"       : ("FF4444","FFFFFF"),
+    "In Progress": ("1565C0","FFFFFF"),
+    "Body Shop"  : ("5D4037","FFFFFF"),
+    "QC"         : ("6A1B9A","FFFFFF"),
+    "Ready"      : ("2E7D32","FFFFFF"),
+    "Delivered"  : ("004D40","CCFFCC"),
+    "On Hold"    : ("37474F","CFD8DC"),
+}
+
+
+# ──────────────────────────────────────────────────────────────
+# HELPERS
+# ──────────────────────────────────────────────────────────────
+def fill(hex_color):
+    return PatternFill("solid", fgColor=hex_color)
+
+def font(color="E2E8F0", size=9, bold=False, name="Calibri"):
+    return Font(name=name, size=size, bold=bold, color=color)
+
+def center(wrap=False):
+    return Alignment(horizontal="center", vertical="center", wrap_text=wrap)
+
+def thin_border():
+    s = Side(border_style="thin", color="374151")
     return Border(left=s, right=s, top=s, bottom=s)
 
-def align(h="left", v="center", wrap=False):
-    return Alignment(horizontal=h, vertical=v, wrap_text=wrap)
+def col_letter(n):
+    return get_column_letter(n)
 
-# ── Column definitions (21 cols A–U) ──────────────────────────────────────
-COLUMNS = [
-    ("A", "Job Card No",                    14),
-    ("B", "Date Opened",                    13),
-    ("C", "Customer Name",                  20),
-    ("D", "Mobile Number",                  17),
-    ("E", "Vehicle Make & Model",           24),
-    ("F", "Plate Number",                   14),
-    ("G", "VIN / Chassis No",              21),
-    ("H", "Mileage (KM)",                  13),
-    ("I", "Customer Complaint",             32),
-    ("J", "Diagnosis Details",              32),
-    ("K", "Work Done / Repairs Performed",  36),
-    ("L", "Parts Changed / Replaced",       32),
-    ("M", "Current Status",                 24),
-    ("N", "Ready for Collection",           18),
-    ("O", "Technician Name",               19),
-    ("P", "Service Advisor",               19),
-    ("Q", "Last Update Date",              18),
-    ("R", "WhatsApp Update Link",          21),
-    ("S", "Customer Alert Sent",           18),
-    ("T", "Remarks / Notes",               32),
-    ("U", "Customer Email",                23),
-]
+def fmt_qar(v):
+    return f"QAR {v:,.2f}"
 
-STATUS_LIST = [
-    "Vehicle Received", "Diagnosis Started", "Waiting Customer Approval",
-    "Parts Ordered", "Repair In Progress", "Additional Work Required",
-    "Work Finished", "Ready for Collection", "Delivered",
-]
+def vat_formula(row):
+    v, w, x = col_letter(C["PARTS_QAR"]), col_letter(C["LABOUR_QAR"]), col_letter(C["DISCOUNT"])
+    return f'=IF({v}{row}+{w}{row}>0,ROUND(MAX(0,{v}{row}+{w}{row}-{x}{row})*0.05,2),0)'
 
-SAMPLE = [
-    {
-        "A": "FG-2024-001",
-        "B": datetime.date.today() - datetime.timedelta(days=2),
-        "C": "Ahmed Al Rashidi",
-        "D": "+971501234567",
-        "E": "Toyota Land Cruiser 2020",
-        "F": "DXB-A-12345",
-        "G": "JTMHX02J504012345",
-        "H": 85000,
-        "I": "Engine overheating. AC not cooling.",
-        "J": "Coolant leak at upper hose. AC compressor low pressure.",
-        "K": "Replaced upper radiator hose. Re-gassed AC system. Road test passed.",
-        "L": "Upper radiator hose × 1, AC refrigerant R134a 800 g",
-        "M": "Work Finished",
-        "N": "YES",
-        "O": "Mohammed Hassan",
-        "P": "Khalid Mansoor",
-        "Q": datetime.datetime.now(),
-        "R": "",
-        "S": "YES",
-        "T": "Customer confirmed collection tomorrow morning.",
-        "U": "ahmed.rashidi@email.com",
-    },
-    {
-        "A": "FG-2024-002",
-        "B": datetime.date.today() - datetime.timedelta(days=1),
-        "C": "Sara Al Mansoori",
-        "D": "+971502345678",
-        "E": "Nissan Patrol 2019",
-        "F": "AUH-B-67890",
-        "G": "JN8AZ2KR5BT012345",
-        "H": 120000,
-        "I": "Gearbox slipping on 2nd gear. Whining noise at speed.",
-        "J": "Gearbox oil burnt black. Solenoid pack faulty. Torque converter suspect.",
-        "K": "",
-        "L": "",
-        "M": "Waiting Customer Approval",
-        "N": "NO",
-        "O": "Faisal Al Zaabi",
-        "P": "Khalid Mansoor",
-        "Q": datetime.datetime.now() - datetime.timedelta(days=1),
-        "R": "",
-        "S": "NO",
-        "T": "Gearbox overhaul quote: AED 4,200. Awaiting customer go-ahead.",
-        "U": "sara.mansoori@email.com",
-    },
-    {
-        "A": "FG-2024-003",
-        "B": datetime.date.today(),
-        "C": "James Wilson",
-        "D": "+971503456789",
-        "E": "BMW X5 xDrive40i 2021",
-        "F": "SHJ-C-11111",
-        "G": "5UXKR6C56F0K12345",
-        "H": 45000,
-        "I": "Check engine light on. Steering vibration above 80 km/h.",
-        "J": "Fault P0138: O2 sensor bank 1. Front brake discs warped.",
-        "K": "Replacing front brake discs and pads. Fitting new O2 sensor bank 1.",
-        "L": "Front brake discs × 2, front brake pads set, O2 sensor B1S2",
-        "M": "Parts Ordered",
-        "N": "NO",
-        "O": "Mohammed Hassan",
-        "P": "David Chen",
-        "Q": datetime.datetime.now(),
-        "R": "",
-        "S": "YES",
-        "T": "Parts ETA 2 business days. Customer informed via WhatsApp.",
-        "U": "james.wilson@email.com",
-    },
-    {
-        "A": "FG-2024-004",
-        "B": datetime.date.today(),
-        "C": "Fatima Al Zahra",
-        "D": "+971504567890",
-        "E": "Mercedes GLC 300 2022",
-        "F": "DXB-D-55555",
-        "G": "WDC0G8EB3KF123456",
-        "H": 28000,
-        "I": "Suspension noise over bumps. Tyre wear uneven.",
-        "J": "Front left control arm bush worn. Wheel alignment out.",
-        "K": "Replacing front left control arm. Full 4-wheel alignment.",
-        "L": "Control arm assembly LH × 1",
-        "M": "Repair In Progress",
-        "N": "NO",
-        "O": "Faisal Al Zaabi",
-        "P": "David Chen",
-        "Q": datetime.datetime.now(),
-        "R": "",
-        "S": "YES",
-        "T": "ETA completion: today 5 PM.",
-        "U": "fatima.alzahra@email.com",
-    },
-    {
-        "A": "FG-2024-005",
-        "B": datetime.date.today() - datetime.timedelta(days=3),
-        "C": "Robert Khalil",
-        "D": "+971505678901",
-        "E": "Ford F-150 Raptor 2020",
-        "F": "AJM-A-99999",
-        "G": "1FTFW1RG9LFA12345",
-        "H": 62000,
-        "I": "Battery draining overnight. Starter motor slow.",
-        "J": "Battery 3 years old, 60% capacity. Starter brushes worn.",
-        "K": "Replaced battery and starter motor. Full electrical system check.",
-        "L": "AGM battery 800CCA × 1, Starter motor × 1",
-        "M": "Ready for Collection",
-        "N": "YES",
-        "O": "Mohammed Hassan",
-        "P": "Khalid Mansoor",
-        "Q": datetime.datetime.now(),
-        "R": "",
-        "S": "YES",
-        "T": "Vehicle ready. Customer notified by WhatsApp and email.",
-        "U": "robert.khalil@email.com",
-    },
-]
+def total_formula(row):
+    v, w, x, y = (col_letter(C["PARTS_QAR"]), col_letter(C["LABOUR_QAR"]),
+                  col_letter(C["DISCOUNT"]),   col_letter(C["VAT_QAR"]))
+    return f'=IF({v}{row}+{w}{row}>0,ROUND(MAX(0,{v}{row}+{w}{row}-{x}{row})+{y}{row},2),0)'
 
-
-def wa_formula(row: int) -> str:
-    """Google Sheets HYPERLINK+ENCODEURL formula for WhatsApp link."""
-    g = "Falcon Garage"
-    r = row
+def wa_formula(row):
+    ph = col_letter(C["PHONE"])
+    jc = col_letter(C["JOB_ID"])
+    nm = col_letter(C["CUST_NAME"])
+    mk = col_letter(C["MAKE"])
+    md = col_letter(C["MODEL"])
+    pl = col_letter(C["PLATE"])
+    st = col_letter(C["STATUS"])
+    tot= col_letter(C["TOTAL_QAR"])
     return (
-        f'=IF(A{r}="","",'
-        f'HYPERLINK('
-        f'"https://wa.me/"'
-        f'&REGEXREPLACE(D{r},"[^0-9]","")'
-        f'&"?text="'
-        f'&ENCODEURL('
-        f'"Dear "&C{r}&","'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Vehicle Update – {g}"'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Job Card: "&A{r}'
-        f'&CHAR(10)'
-        f'&"Vehicle: "&E{r}&" | "&F{r}'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Work Completed:"'
-        f'&CHAR(10)&IF(K{r}="","N/A",K{r})'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Parts Changed:"'
-        f'&CHAR(10)&IF(L{r}="","N/A",L{r})'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Current Status:"'
-        f'&CHAR(10)&IF(M{r}="","Not Set",M{r})'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Ready for Collection:"'
-        f'&CHAR(10)&IF(N{r}="","Pending",N{r})'
-        f'&CHAR(10)&CHAR(10)'
-        f'&"Thank you,"'
-        f'&CHAR(10)&"{g}"'
-        f'),'
-        f'"📱 Send Update"))'
+        f'=IF({ph}{row}="","",'
+        f'HYPERLINK("https://wa.me/974"&REGEXREPLACE({ph}{row},"[^0-9]","")&"?text="&'
+        f'ENCODEURL("Dear "&{nm}{row}&", your vehicle ("&{mk}{row}&" "&{md}{row}&" | Plate: "&{pl}{row}&") — Job: "&{jc}{row}&" | Status: "&{st}{row}&" | Total: QAR "&{tot}{row}&". Thank you — Falcon Garage, Doha +974 4486 2018"),'
+        f'"📱 WhatsApp"))'
     )
 
 
+# ──────────────────────────────────────────────────────────────
+# SAMPLE DATA (5 rows — JC-2026-001 to JC-2026-005)
+# ──────────────────────────────────────────────────────────────
+TODAY = datetime.date.today().strftime("%d/%m/%Y")
+
+SAMPLE_ROWS = [
+    # JOB_ID     DATE_IN  TIME_IN  STATUS            PRIORITY      JOB_TYPE            TECHNICIAN
+    # CUST_NAME            PHONE           EMAIL                 CUST_ID
+    # PLATE      MAKE      MODEL       YEAR   VIN                    ODOMETER   VEH_TYPE
+    # COMPLAINT                WORK_DONE                  PARTS_USED
+    # PARTS  LABOUR  DISC  VAT     TOTAL   PAYMENT          PAY_STATUS
+    # EST_REF  INV_REF  DATE_OUT  APPROVED_BY  WA_LINK  ALERT_SENT
+    [
+        "JC-2026-001", TODAY, "08:30", "✅ Delivered", "🟢 NORMAL", "Oil Change", "Ahmed Al-Rashidi",
+        "Mohammed Al-Hamad", "+974 5512 3456", "m.alhamad@email.com", "QID-28843721",
+        "A 12345", "Toyota", "Land Cruiser", "2022", "JTMCV02J204045321", "62000 km", "SUV",
+        "Routine oil change & filter", "Completed oil change, replaced filter", "Engine oil 5L, oil filter",
+        350, 150, 0, None, None, "Cash", "Pending",
+        "EST-001", "INV-001", TODAY, "Ahmed Al-Rashidi", None, None,
+    ],
+    [
+        "JC-2026-002", TODAY, "09:15", "🟢 Ready", "🔴 URGENT", "AC Repair", "Khalid Al-Sayed",
+        "Sarah Johnson", "+974 6623 4567", "s.johnson@gmail.com", "QID-39124568",
+        "B 67890", "Nissan", "Patrol", "2020", "JN8AY2ND5L9760412", "45200 km", "SUV",
+        "AC not cooling at all", "Replaced compressor & recharged", "AC Compressor, refrigerant gas",
+        1200, 450, 0, None, None, "Card", "Pending",
+        "EST-002", "INV-002", None, "Khalid Al-Sayed", None, None,
+    ],
+    [
+        "JC-2026-003", TODAY, "10:00", "🔵 In Progress", "🟡 HIGH", "Body Repair", "Yousuf Ibrahim",
+        "Ali Karimi", "+974 7734 5678", "ali.karimi@work.qa", "QID-45231890",
+        "C 11111", "BMW", "5 Series", "2021", "WBA13BJ08MCF62831", "31500 km", "Sedan",
+        "Front bumper damage", "Dent removal in progress", "Bumper paint, filler compound",
+        800, 600, 50, None, None, "Bank Transfer", "Pending",
+        "EST-003", None, None, "Yousuf Ibrahim", None, None,
+    ],
+    [
+        "JC-2026-004", TODAY, "11:30", "🔴 Open", "🟢 NORMAL", "General Service", "Fatima Al-Dosari",
+        "Rania Khalil", "+974 3345 6789", "rania.k@hotmail.com", "QID-56342901",
+        "D 22222", "Mercedes", "C-Class", "2023", "WDD2050422R456789", "15000 km", "Sedan",
+        "Full service check", "Awaiting technician assignment", "Service kit, brake pads",
+        500, 300, 25, None, None, "Cash", "Pending",
+        "EST-004", None, None, None, None, None,
+    ],
+    [
+        "JC-2026-005", TODAY, "13:00", "🔧 Body Shop", "🟡 HIGH", "Tyres / Alignment", "Hassan Al-Mansoor",
+        "James O'Brien", "+974 5567 8901", "james.ob@corp.net", "QID-67453012",
+        "E 33333", "Ford", "F-150", "2019", "1FTEW1E55KKC24680", "78900 km", "Pick-up",
+        "Wheel alignment & new tyres", "Alignment done, fitting tyres", "4x Michelin LTX tyres",
+        1800, 250, 100, None, None, "Credit", "Pending",
+        "EST-005", None, None, "Hassan Al-Mansoor", None, None,
+    ],
+]
+
+
+# ──────────────────────────────────────────────────────────────
+# BUILD WORKBOOK
+# ──────────────────────────────────────────────────────────────
 def build():
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "JOB UPDATE TRACKER"
-    ws.sheet_properties.tabColor = HEADER_BG
+    ws.title = SHEET_NAME
 
-    # ── Row 1: Title ───────────────────────────────────────────────
-    ws.row_dimensions[1].height = 52
-    ws.merge_cells("A1:U1")
-    c = ws["A1"]
-    c.value = "🔧   FALCON GARAGE  |  JOB UPDATE TRACKER"
-    c.font      = font(bold=True, color=WHITE, size=20)
-    c.fill      = fill(TITLE_BG)
-    c.alignment = align("center", "center")
+    # ── Row 1: Main Title ──────────────────────────────────
+    ws.merge_cells(start_row=TITLE_ROW, start_column=1, end_row=TITLE_ROW, end_column=TOTAL_COLS)
+    c = ws.cell(TITLE_ROW, 1)
+    c.value = f"🦅  {GARAGE_NAME}  |  {GARAGE_AR}  —  Job Update Tracker"
+    c.fill = fill("111827")
+    c.font = font("F59E0B", 18, True)
+    c.alignment = center()
+    ws.row_dimensions[TITLE_ROW].height = 38
 
-    # ── Row 2: Subtitle ────────────────────────────────────────────
-    ws.row_dimensions[2].height = 26
-    ws.merge_cells("A2:U2")
-    c = ws["A2"]
-    c.value = (
-        "Manage Job Cards  ·  Track Repairs  ·  WhatsApp & Email Updates  ·  "
-        "Monthly PDF Reports  ·  Permanent History"
-    )
-    c.font      = font(italic=True, color="AACCEE", size=10)
-    c.fill      = fill(HEADER_BG)
-    c.alignment = align("center", "center")
+    # ── Row 2: Subtitle ────────────────────────────────────
+    ws.merge_cells(start_row=SUB_ROW, start_column=1, end_row=SUB_ROW, end_column=TOTAL_COLS)
+    c = ws.cell(SUB_ROW, 1)
+    c.value = (f"📞 {GARAGE_TEL}   🌐 {GARAGE_WEB}   ✉ {GARAGE_EMAIL}   📍 {GARAGE_ADDR}")
+    c.fill = fill("1F2937")
+    c.font = font("9CA3AF", 9)
+    c.alignment = center()
+    ws.row_dimensions[SUB_ROW].height = 20
 
-    # ── Row 3: Column headers ──────────────────────────────────────
-    ws.row_dimensions[3].height = 42
-    hdr_border = Border(
-        left   = Side(style="thin",   color=TITLE_BG),
-        right  = Side(style="thin",   color=TITLE_BG),
-        top    = Side(style="thin",   color=TITLE_BG),
-        bottom = Side(style="medium", color=TITLE_BG),
-    )
-    for col_letter, label, width in COLUMNS:
-        col_idx = openpyxl.utils.column_index_from_string(col_letter)
-        c = ws.cell(row=3, column=col_idx, value=label)
-        c.font      = font(bold=True, color=WHITE, size=10)
-        c.fill      = fill(BAND_BG)
-        c.alignment = align("center", "center", wrap=True)
-        c.border    = hdr_border
-        ws.column_dimensions[col_letter].width = width
+    # ── Row 3: Section Group Headers ───────────────────────
+    ws.row_dimensions[GROUP_ROW].height = 20
+    for g in GROUPS:
+        if g["e"] > g["s"]:
+            ws.merge_cells(start_row=GROUP_ROW, start_column=g["s"], end_row=GROUP_ROW, end_column=g["e"])
+        c = ws.cell(GROUP_ROW, g["s"])
+        c.value = g["label"]
+        c.fill = fill(g["bg"])
+        c.font = font(g["fg"], 9, True)
+        c.alignment = center()
 
-    # ── Data validation (dropdowns) ────────────────────────────────
-    status_dv = DataValidation(
-        type="list",
-        formula1=f'"{",".join(STATUS_LIST)}"',
-        allow_blank=True, showDropDown=False,
-    )
-    status_dv.promptTitle = "Job Status"
-    status_dv.prompt      = "Select the current repair status"
-    status_dv.errorTitle  = "Invalid Status"
-    status_dv.error       = "Please choose a value from the list"
-    ws.add_data_validation(status_dv)
-    status_dv.add("M4:M1000")
+    # ── Row 4: Column Headers ──────────────────────────────
+    ws.row_dimensions[HEADER_ROW].height = 32
+    for i, h in enumerate(HEADERS):
+        c = ws.cell(HEADER_ROW, i + 1)
+        c.value = h
+        c.fill = fill("0F172A")
+        c.font = font("E2E8F0", 9, True)
+        c.alignment = center(wrap=True)
+        c.border = thin_border()
 
-    for col_range in ("N4:N1000", "S4:S1000"):
-        yn_dv = DataValidation(
-            type="list", formula1='"YES,NO"',
-            allow_blank=True, showDropDown=False,
-        )
-        yn_dv.errorTitle = "Invalid"
-        yn_dv.error      = "Select YES or NO"
-        ws.add_data_validation(yn_dv)
-        yn_dv.add(col_range)
+    # ── Sample Data Rows ───────────────────────────────────
+    for i, row_data in enumerate(SAMPLE_ROWS):
+        r = DATA_START + i
+        for j, val in enumerate(row_data):
+            if val is not None:
+                ws.cell(r, j + 1).value = val
 
-    # ── Conditional formatting (status row colours) ─────────────────
-    cf_rules = [
-        ("Waiting Customer Approval", RED_BG, RED_FG),
-        ("Parts Ordered",             ORG_BG, ORG_FG),
-        ("Additional Work Required",  ORG_BG, ORG_FG),
-        ("Repair In Progress",        BLU_BG, BLU_FG),
-        ("Work Finished",             GRN_BG, GRN_FG),
-        ("Ready for Collection",      GRN_BG, GRN_FG),
-        ("Delivered",                 GRY_BG, GRY_FG),
-    ]
-    for status, bg, fg in cf_rules:
+        # Status colour
+        status_val = row_data[C["STATUS"] - 1]
+        bg, fg = "1A2332", "D1D5DB"
+        for kw, colours in STATUS_COLOURS.items():
+            if kw in status_val:
+                bg, fg = colours
+                break
+
+        for col_idx in range(1, TOTAL_COLS + 1):
+            cell = ws.cell(r, col_idx)
+            cell.fill = fill(bg)
+            cell.font = font(fg, 9)
+            cell.alignment = Alignment(vertical="center", wrap_text=True)
+            cell.border = thin_border()
+
+        # Formulas
+        ws.cell(r, C["VAT_QAR"  ]).value = vat_formula(r)
+        ws.cell(r, C["TOTAL_QAR"]).value = total_formula(r)
+        ws.cell(r, C["WA_LINK"  ]).value = wa_formula(r)
+
+        ws.row_dimensions[r].height = 20
+
+    # ── Zebra stripe for remaining empty rows (up to row 54) ──
+    for r in range(DATA_START + len(SAMPLE_ROWS), DATA_START + 50):
+        bg = "1A2332" if r % 2 == 0 else "111827"
+        for col_idx in range(1, TOTAL_COLS + 1):
+            cell = ws.cell(r, col_idx)
+            cell.fill = fill(bg)
+            cell.font = font("D1D5DB", 9)
+        ws.row_dimensions[r].height = 18
+
+    # ── Conditional Formatting (row-level status colours) ──
+    status_col_letter = col_letter(C["STATUS"])
+    for kw, (bg, fg) in STATUS_COLOURS.items():
+        formula = [
+            f'NOT(ISBLANK(${status_col_letter}{DATA_START}))'
+            f'*ISNUMBER(SEARCH("{kw}",${status_col_letter}{DATA_START}))'
+        ]
         dxf = DifferentialStyle(
-            font=Font(color=fg, bold=True),
-            fill=PatternFill(start_color=bg, end_color=bg, fill_type="solid"),
+            fill=PatternFill(bgColor=bg),
+            font=Font(color=fg),
         )
-        rule = Rule(type="expression", formula=[f'$M4="{status}"'], dxf=dxf)
-        ws.conditional_formatting.add("A4:U1000", rule)
+        rule = Rule(type="expression", formula=formula, dxf=dxf)
+        data_range = f"A{DATA_START}:{col_letter(TOTAL_COLS)}{DATA_START + 499}"
+        ws.conditional_formatting.add(data_range, rule)
 
-    # ── Data rows ──────────────────────────────────────────────────
-    cell_border = border()
-    COL_LETTERS = [col for col, _, _ in COLUMNS]
+    # ── Data Validation dropdowns ──────────────────────────
+    dv_range = f"{DATA_START}:{DATA_START + 499}"
 
-    def write_row(ws, row_num, data: dict, is_sample=False):
-        bg = ROW_A if (row_num - 4) % 2 == 0 else ROW_B
-        ws.row_dimensions[row_num].height = 22 if not is_sample else 24
+    def add_dv(col_idx, formula1):
+        dv = DataValidation(type="list", formula1=formula1, allow_blank=True, showDropDown=False)
+        ws.add_data_validation(dv)
+        dv.add(f"{col_letter(col_idx)}{DATA_START}:{col_letter(col_idx)}{DATA_START+499}")
 
-        for col_letter in COL_LETTERS:
-            col_idx = openpyxl.utils.column_index_from_string(col_letter)
-            c = ws.cell(row=row_num, column=col_idx)
-            c.fill   = fill(bg)
-            c.border = cell_border
-            c.font   = font(size=10)
-            c.alignment = align("left", "center")
+    add_dv(C["STATUS"],    '"🔴 Open,🔵 In Progress,🔧 Body Shop,🔍 QC,🟢 Ready,✅ Delivered,⏸ On Hold"')
+    add_dv(C["PRIORITY"],  '"🔴 URGENT,🟡 HIGH,🟢 NORMAL,🔵 LOW"')
+    add_dv(C["JOB_TYPE"],  '"General Service,Oil Change,Body Repair,Electrical,AC Repair,Tyres / Alignment,Inspection,Custom / Other"')
+    add_dv(C["VEH_TYPE"],  '"Sedan,SUV,Pick-up,Van,Truck,Motorcycle,Other"')
+    add_dv(C["PAY_STATUS"],"\"Cash,Card,Bank Transfer,Credit,Pending\"")
 
-        for col_letter, value in data.items():
-            col_idx = openpyxl.utils.column_index_from_string(col_letter)
-            c = ws.cell(row=row_num, column=col_idx)
-            c.value = value
+    # ── Column Widths ──────────────────────────────────────
+    for col_idx, width in COL_WIDTHS.items():
+        ws.column_dimensions[col_letter(col_idx)].width = width
 
-        # Column-specific styles
-        # A: job card bold+accent
-        a = ws.cell(row=row_num, column=1)
-        a.font = font(bold=True, color=ACCENT, size=10)
-        a.alignment = align("center", "center")
+    # ── Freeze panes (freeze rows 1-4 + col A) ────────────
+    ws.freeze_panes = ws.cell(HEADER_ROW + 1, 2)
 
-        # B: date format
-        b = ws.cell(row=row_num, column=2)
-        b.number_format = "DD-MMM-YYYY"
-        b.alignment = align("center", "center")
+    # ── Tab colour ─────────────────────────────────────────
+    ws.sheet_properties.tabColor = "F59E0B"
 
-        # C: customer name bold
-        ws.cell(row=row_num, column=3).font = font(bold=True, size=10)
+    # ── Instructions sheet ─────────────────────────────────
+    instr = wb.create_sheet("📋 Setup Guide")
+    _build_instructions(instr)
 
-        # D: mobile center
-        ws.cell(row=row_num, column=4).alignment = align("center", "center")
-
-        # F: plate center
-        ws.cell(row=row_num, column=6).alignment = align("center", "center")
-
-        # H: mileage
-        h = ws.cell(row=row_num, column=8)
-        h.number_format = "#,##0"
-        h.alignment = align("center", "center")
-
-        # I, J, K, L, T: wrap text
-        for col in (9, 10, 11, 12, 20):
-            ws.cell(row=row_num, column=col).alignment = align("left", "top", wrap=True)
-            ws.row_dimensions[row_num].height = 36 if is_sample else 22
-
-        # M: status bold center
-        m = ws.cell(row=row_num, column=13)
-        m.font = font(bold=True, size=10)
-        m.alignment = align("center", "center")
-
-        # N: ready center bold
-        n = ws.cell(row=row_num, column=14)
-        n.font = font(bold=True, size=10)
-        n.alignment = align("center", "center")
-
-        # Q: update date
-        q = ws.cell(row=row_num, column=17)
-        q.number_format = "DD-MMM-YYYY HH:mm"
-        q.alignment = align("center", "center")
-
-        # R: WhatsApp formula
-        r_cell = ws.cell(row=row_num, column=18)
-        r_cell.value = wa_formula(row_num)
-        r_cell.font  = font(bold=True, color=LINK_C, size=10, underline="single")
-        r_cell.alignment = align("center", "center")
-
-        # S: alert center
-        ws.cell(row=row_num, column=19).alignment = align("center", "center")
-
-        # U: email color
-        u = ws.cell(row=row_num, column=21)
-        u.font = font(color=ACCENT, size=10)
-        u.alignment = align("center", "center")
-
-    # Write 5 sample rows
-    for idx, row_data in enumerate(SAMPLE):
-        write_row(ws, 4 + idx, row_data, is_sample=True)
-
-    # Write blank formatted rows 9–300 with WhatsApp formula
-    for row_num in range(9, 301):
-        write_row(ws, row_num, {}, is_sample=False)
-
-    # ── Freeze panes at row 4 (title + subtitle + header frozen) ──
-    ws.freeze_panes = "A4"
-
-    # ── Auto-filter on header row ──────────────────────────────────
-    ws.auto_filter.ref = "A3:U3"
-
-    # ── Page setup ─────────────────────────────────────────────────
-    ws.page_setup.orientation = "landscape"
-    ws.page_setup.fitToWidth  = 1
-    ws.page_setup.fitToHeight = 0
-    ws.print_title_rows = "1:3"
-    ws.sheet_view.showGridLines = True
-
-    wb.save(OUTPUT)
-    print(f"✅  Saved: {OUTPUT}")
+    wb.save("Falcon_Garage_Job_Tracker.xlsx")
+    print("✅  Falcon_Garage_Job_Tracker.xlsx generated successfully (v3.0 — 34 columns)")
 
 
+# ──────────────────────────────────────────────────────────────
+# INSTRUCTIONS SHEET
+# ──────────────────────────────────────────────────────────────
+def _build_instructions(ws):
+    ws.column_dimensions["A"].width = 6
+    ws.column_dimensions["B"].width = 55
+    ws.column_dimensions["C"].width = 55
+
+    def row(r, a="", b="", c="", bg="111827", fg="E2E8F0", bold=False, size=10):
+        for col, val in [(1, a), (2, b), (3, c)]:
+            cell = ws.cell(r, col)
+            cell.value = val
+            cell.fill = fill(bg)
+            cell.font = font(fg, size, bold)
+            cell.alignment = Alignment(vertical="center", wrap_text=True)
+        ws.row_dimensions[r].height = 20
+
+    row(1, "", "🦅 FALCON GARAGE — SETUP GUIDE", "", bg="111827", fg="F59E0B", bold=True, size=14)
+    row(2, "", "Google Sheets + Apps Script  v3.0", "", bg="1F2937", fg="9CA3AF")
+    row(3)
+    row(4,  "", "STEP 1: Upload this file to Google Sheets", "", bg="0D47A1", fg="FFFFFF", bold=True)
+    row(5,  "", "1a. Go to sheets.new", "")
+    row(6,  "", "1b. File → Import → Upload → select Falcon_Garage_Job_Tracker.xlsx", "")
+    row(7,  "", "1c. Choose 'Replace spreadsheet' → Import data", "")
+    row(8)
+    row(9,  "", "STEP 2: Add the Apps Script", "", bg="065F46", fg="F59E0B", bold=True)
+    row(10, "", "2a. Extensions → Apps Script", "")
+    row(11, "", "2b. Delete all existing code in Code.gs", "")
+    row(12, "", "2c. Paste the full content of Falcon_Garage_Tracker.gs", "")
+    row(13, "", "2d. Save (Ctrl+S / Cmd+S)", "")
+    row(14)
+    row(15, "", "STEP 3: Run Setup", "", bg="374151", fg="FFFFFF", bold=True)
+    row(16, "", "3a. Back in the spreadsheet, refresh the page (F5)", "")
+    row(17, "", "3b. Click  🦅 Falcon Garage  in the menu bar", "")
+    row(18, "", "3c. Click  ⚙ Setup Sheet (first-time)", "")
+    row(19, "", "3d. Authorise the script when prompted", "")
+    row(20)
+    row(21, "", "DAILY USAGE", "", bg="0891B2", fg="FFFFFF", bold=True)
+    row(22, "", "• Menu → New Job Card      → auto-generates JC-YYYY-NNN", "")
+    row(23, "", "• Status dropdown          → row colour changes instantly", "")
+    row(24, "", "• 📱 WhatsApp link (col AG)→ opens WhatsApp Web with pre-filled message", "")
+    row(25, "", "• Menu → Email             → branded HTML update to customer", "")
+    row(26, "", "• Menu → Monthly PDF       → saved to Google Drive", "")
+    row(27)
+    row(28, "", "COLUMNS  A–AH  (34 total)", "", bg="7C3AED", fg="FFFFFF", bold=True)
+    row(29, "", "A  Job ID        B  Date In      C  Time In      D  Status       E  Priority", "")
+    row(30, "", "F  Job Type      G  Technician   H  Cust Name    I  Phone        J  Email", "")
+    row(31, "", "K  Cust ID       L  Plate        M  Make         N  Model        O  Year", "")
+    row(32, "", "P  VIN           Q  Odometer     R  Veh Type     S  Complaint    T  Work Done", "")
+    row(33, "", "U  Parts Used    V  Parts QAR    W  Labour QAR   X  Discount     Y  VAT QAR", "")
+    row(34, "", "Z  Total QAR     AA Payment      AB Pay Status   AC Est Ref      AD Inv Ref", "")
+    row(35, "", "AE Date Out      AF Approved By  AG WhatsApp     AH Alert Sent", "")
+    row(36)
+    row(37, "", f"Contact: {GARAGE_EMAIL}  |  {GARAGE_WEB}", "", bg="0F172A", fg="6B7280")
+
+    ws.sheet_properties.tabColor = "374151"
+
+
+# ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     build()
